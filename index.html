@@ -59,31 +59,71 @@
 
   #tb-panel { transition:transform .35s cubic-bezier(.22,1,.36,1); }
   #tb-panel.hidden-panel { transform:translateX(108%); }
-  .tb-tab.active { background:#2c2c2c; color:#fff; }
-  .tb-input { background:#1c1c1c; border:1px solid #333; color:#e7e7e7; }
-  .tb-input:focus { outline:none; border-color:#FFDF00; }
-  input[type="color"].tb-swatch { -webkit-appearance:none; appearance:none; border:1px solid #333; border-radius:6px; padding:0; width:38px; height:32px; cursor:pointer; background:transparent; }
+  .tb-input { background:#ffffff; border:1px solid #d9d9dc; color:#1c1c1f; }
+  .tb-input:focus { outline:none; border-color:#B98A4B; box-shadow:0 0 0 2px rgba(185,138,75,.15); }
+  .tb-input:hover { border-color:#b3b3b8; }
+  input[type="color"].tb-swatch { -webkit-appearance:none; appearance:none; border:1px solid #d9d9dc; border-radius:6px; padding:0; width:38px; height:32px; cursor:pointer; background:transparent; }
   input[type="color"].tb-swatch::-webkit-color-swatch-wrapper { padding:2px; }
   input[type="color"].tb-swatch::-webkit-color-swatch { border:none; border-radius:4px; }
 
   .ph-section { border-top:1px dashed rgba(37,39,58,.18); }
   @media (prefers-reduced-motion: reduce){ *{scroll-behavior:auto !important;} }
+
+  /* --- Bento Grid: hover premium --- */
+  .bento-card { transition: transform .5s cubic-bezier(.22,1,.36,1), border-color .4s; will-change: transform; }
+  .bento-card:hover { border-color: rgba(255,223,0,.4); }
+  .bento-img { transition: transform .7s cubic-bezier(.22,1,.36,1), opacity .5s; will-change: transform; }
+  .bento-card:hover .bento-img { transform: scale(1.06); opacity: 1; }
+
+  /* --- Botón magnético --- */
+  .magnetic { position:relative; will-change: transform; }
+  .magnetic-inner { display:inline-flex; will-change: transform; }
+
+  /* --- Barra de progreso de scroll --- */
+  #scroll-progress { position:fixed; top:0; left:0; height:2px; background:#FFDF00; width:0%; z-index:50; transform-origin:left; }
+
+  /* --- Cursor a medida sobre elementos interactivos (desktop, fuera del editor) --- */
+  body:not(.edit-mode) .cursor-hint { cursor: pointer; }
+
+  /* --- acordeón de slides en el editor (tema claro estilo Figma) --- */
+  .tb-slide { background:#ffffff; border:1px solid #e5e5e8; border-radius:8px; overflow:hidden; }
+  .tb-slide-head { display:flex; align-items:center; gap:8px; padding:9px 10px; cursor:pointer; user-select:none; }
+  .tb-slide-head:hover { background:#f5f5f6; }
+  .tb-slide-handle { cursor:grab; color:#a8a8ad; touch-action:none; }
+  .tb-slide-handle:active { cursor:grabbing; }
+  .tb-slide-num { font-size:10px; color:#9b9ba1; width:16px; text-align:center; shrink:0; }
+  .tb-slide-name { flex:1; font-size:12px; font-weight:500; color:#1c1c1f; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tb-slide-chevron { color:#9b9ba1; transition:transform .2s; }
+  .tb-slide.open .tb-slide-chevron { transform:rotate(90deg); }
+  .tb-slide-body { display:none; padding:4px 10px 12px 32px; border-top:1px solid #eeeeef; }
+  .tb-slide.open .tb-slide-body { display:block; }
+  .tb-slide.dragging { opacity:.4; }
+  .tb-slide.drag-over { outline:1.5px dashed #B98A4B; outline-offset:2px; }
+  .tb-item-row { display:flex; align-items:center; gap:7px; padding:6px 6px; border-radius:6px; cursor:pointer; font-size:11.5px; color:#5c5c63; }
+  .tb-item-row:hover { background:#f5f5f6; color:#1c1c1f; }
+  .tb-item-row.active { background:#fbf3e9; color:#9a6a2f; }
+  .tb-item-row .ic { color:#9b9ba1; shrink:0; }
+  .tb-item-row span.lbl { flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  /* indicador en la web del slide seleccionado en el panel */
+  .tb-slide-highlight { outline:2px solid #B98A4B !important; outline-offset:-2px; }
 </style>
 </head>
 
 <body class="bg-navy text-cream font-sans antialiased overflow-x-hidden">
 
+<div id="scroll-progress"></div>
+
 <!-- ============ NAVBAR ============ -->
 <header class="fixed top-0 left-0 w-full z-40">
   <div class="h-16 px-6 md:px-10 flex items-center justify-between text-cream backdrop-blur-[2px]">
     <span class="text-[11px] tracking-[0.18em] font-medium" data-ek="nav.client">NOMBRE CLIENTE</span>
-    <nav class="hidden lg:flex gap-7 text-[13px] font-medium">
-      <a href="#porque" class="hover:text-yellow transition-colors" data-ek="nav.l1">Savills en el mundo</a>
-      <a href="#equipo" class="hover:text-yellow transition-colors" data-ek="nav.l2">Equipo</a>
-      <a href="#servicios" class="hover:text-yellow transition-colors" data-ek="nav.l3">Servicios</a>
-      <a href="#cartera" class="hover:text-yellow transition-colors" data-ek="nav.l4">Cartera</a>
-      <a href="#credenciales" class="hover:text-yellow transition-colors" data-ek="nav.l5">Credenciales</a>
-      <a href="#contacta" class="hover:text-yellow transition-colors" data-ek="nav.l6">Contacta</a>
+    <nav class="hidden lg:flex gap-7 text-[13px] font-medium nav-magnetic-group">
+      <a href="#porque" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l1">Savills en el mundo</a>
+      <a href="#equipo" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l2">Equipo</a>
+      <a href="#servicios" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l3">Servicios</a>
+      <a href="#cartera" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l4">Cartera</a>
+      <a href="#credenciales" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l5">Credenciales</a>
+      <a href="#contacta" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l6">Contacta</a>
     </nav>
     <span class="text-[11px] tracking-[0.18em] font-bold" data-ek="nav.brand">SAVILLS</span>
   </div>
@@ -98,7 +138,7 @@
       <h1 class="parallax display text-white text-[20vw] md:text-[96px] leading-[0.9]" data-speed="0.08" data-ek="cover.title">Hoteles</h1>
       <p class="mt-3 text-[12px] md:text-[14px] tracking-[0.28em] uppercase text-white/90" data-ek="cover.sub">Asset Management. Propuesta de servicios</p>
     </div>
-    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 savills-mark w-[88px] h-[88px] rounded-[2px] flex items-center justify-center text-2xl lowercase">savills</div>
+    <div id="savills-seal" class="magnetic absolute bottom-8 left-1/2 -translate-x-1/2 savills-mark w-[88px] h-[88px] rounded-[2px] flex items-center justify-center text-2xl lowercase cursor-hint">savills</div>
   </section>
 
   <!-- ===== 02 · SAVILLS EN EL MUNDO (diseño real del Figma: "Presencia Global · Desktop") ===== -->
@@ -210,15 +250,31 @@
     </div>
   </section>
 
-  <!-- ===== 05 · CARTERA (a completar) ===== -->
+  <!-- ===== 05 · CARTERA — Bento Grid ===== -->
   <section id="cartera" data-bgk="cartera" class="savills-texture relative text-cream py-28 md:py-40 overflow-hidden">
     <div class="relative max-w-[1200px] mx-auto px-6 md:px-10">
       <span class="text-[10px] uppercase tracking-[0.22em] text-cream/45" data-ek="cart.kicker">03 — Cartera</span>
       <h2 class="display text-4xl md:text-6xl mt-4 mb-14 text-white" data-ek="cart.title">Operaciones de referencia</h2>
-      <div class="grid md:grid-cols-3 gap-6">
-        <div class="aspect-[4/3] rounded-lg overflow-hidden bg-white/5 border border-white/10"><img data-imgk="cart.1" alt="" class="w-full h-full object-cover opacity-80" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='400' height='300' fill='%2333364d'/></svg>"></div>
-        <div class="aspect-[4/3] rounded-lg overflow-hidden bg-white/5 border border-white/10"><img data-imgk="cart.2" alt="" class="w-full h-full object-cover opacity-80" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='400' height='300' fill='%2333364d'/></svg>"></div>
-        <div class="aspect-[4/3] rounded-lg overflow-hidden bg-white/5 border border-white/10"><img data-imgk="cart.3" alt="" class="w-full h-full object-cover opacity-80" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='400' height='300' fill='%2333364d'/></svg>"></div>
+
+      <div class="bento-grid grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 auto-rows-[180px] md:auto-rows-[200px]">
+        <div class="bento-card relative rounded-xl overflow-hidden bg-white/5 border border-white/10 col-span-2 row-span-2">
+          <img data-imgk="cart.1" alt="" class="bento-img w-full h-full object-cover opacity-80" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'><rect width='600' height='600' fill='%2333364d'/></svg>">
+          <div class="absolute inset-0 bg-gradient-to-t from-navytx/70 via-transparent to-transparent pointer-events-none"></div>
+          <div class="absolute bottom-4 left-4 right-4 pointer-events-none"><span class="text-[11px] uppercase tracking-[0.16em] text-white/70" data-ek="cart.1.t">Madrid · Adquisición</span></div>
+        </div>
+        <div class="bento-card relative rounded-xl overflow-hidden bg-white/5 border border-white/10 col-span-2 row-span-1">
+          <img data-imgk="cart.2" alt="" class="bento-img w-full h-full object-cover opacity-80" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='300'><rect width='600' height='300' fill='%2333364d'/></svg>">
+          <div class="absolute inset-0 bg-gradient-to-t from-navytx/70 via-transparent to-transparent pointer-events-none"></div>
+          <div class="absolute bottom-3 left-4 right-4 pointer-events-none"><span class="text-[11px] uppercase tracking-[0.16em] text-white/70" data-ek="cart.2.t">Barcelona · Asset Management</span></div>
+        </div>
+        <div class="bento-card relative rounded-xl overflow-hidden bg-white/5 border border-white/10 col-span-1 row-span-1">
+          <img data-imgk="cart.3" alt="" class="bento-img w-full h-full object-cover opacity-80" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><rect width='300' height='300' fill='%2333364d'/></svg>">
+          <div class="absolute inset-0 bg-gradient-to-t from-navytx/70 via-transparent to-transparent pointer-events-none"></div>
+        </div>
+        <div class="bento-card relative rounded-xl overflow-hidden bg-white/5 border border-white/10 col-span-1 row-span-1">
+          <img data-imgk="cart.4" alt="" class="bento-img w-full h-full object-cover opacity-80" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><rect width='300' height='300' fill='%232a2e42'/></svg>">
+          <div class="absolute inset-0 bg-gradient-to-t from-navytx/70 via-transparent to-transparent pointer-events-none"></div>
+        </div>
       </div>
     </div>
   </section>
@@ -243,7 +299,7 @@
     <div class="relative max-w-[1200px] mx-auto px-6 md:px-10">
       <span class="text-[10px] uppercase tracking-[0.22em] text-cream/45" data-ek="cta.kicker">05 — Contacta</span>
       <h2 class="display text-[11vw] md:text-[72px] leading-[0.95] text-white mt-5 max-w-3xl" data-ek="cta.title">Hablemos de tu activo.</h2>
-      <a href="mailto:hoteles@savills.es" class="group inline-flex items-center gap-3 mt-9 text-2xl md:text-3xl display border-b-2 border-yellow pb-1 text-white">
+      <a href="mailto:hoteles@savills.es" id="cta-mail-link" class="magnetic group inline-flex items-center gap-3 mt-9 text-2xl md:text-3xl display border-b-2 border-yellow pb-1 text-white cursor-hint">
         <span data-ek="cta.mail">hoteles@savills.es</span>
         <i data-lucide="arrow-up-right" class="w-7 h-7 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
       </a>
@@ -328,67 +384,149 @@
 
 
 <!-- ============ EDITOR OCULTO (panel) ============ -->
-<aside id="tb-panel" class="fixed top-0 right-0 h-screen w-[320px] z-[60] bg-[#181818] text-[#e7e7e7] border-l border-[#2c2c2c] shadow-2xl flex-col hidden-panel" style="display:none; font-family:Inter,sans-serif;">
-  <div class="flex items-center justify-between px-4 h-12 border-b border-[#2c2c2c]">
+<aside id="tb-panel" class="fixed top-0 right-0 h-screen w-[340px] z-[60] bg-white text-[#1c1c1f] border-l border-[#e5e5e8] shadow-2xl flex-col hidden-panel" style="display:none; font-family:Inter,sans-serif;">
+  <div class="flex items-center justify-between px-4 h-12 border-b border-[#e5e5e8] shrink-0">
     <div class="flex items-center gap-2">
       <div class="w-5 h-5 rounded-[5px] bg-yellow flex items-center justify-center text-[10px] font-bold text-navy">F</div>
       <span class="text-sm font-medium">PPT&nbsp;to&nbsp;Figma</span>
     </div>
-    <button id="tb-close" class="text-[#888] hover:text-white"><i data-lucide="chevrons-right" class="w-4 h-4"></i></button>
+    <button id="tb-close" class="text-[#9b9ba1] hover:text-[#1c1c1f]"><i data-lucide="chevrons-right" class="w-4 h-4"></i></button>
   </div>
-  <div class="flex border-b border-[#2c2c2c] text-xs">
-    <button class="tb-tab active flex-1 py-2.5 flex items-center justify-center gap-1.5" data-tab="design"><i data-lucide="palette" class="w-3.5 h-3.5"></i>Diseño</button>
-    <button class="tb-tab flex-1 py-2.5 flex items-center justify-center gap-1.5" data-tab="text"><i data-lucide="type" class="w-3.5 h-3.5"></i>Texto</button>
-    <button class="tb-tab flex-1 py-2.5 flex items-center justify-center gap-1.5" data-tab="img"><i data-lucide="image" class="w-3.5 h-3.5"></i>Galería</button>
-  </div>
-  <div class="flex-1 overflow-y-auto">
-    <div id="tb-inspector" class="px-4 py-4 border-b border-[#2c2c2c]">
-      <div class="text-[10px] uppercase tracking-[0.18em] text-[#888] mb-2">Selección</div>
-      <div id="tb-sel-empty" class="text-xs text-[#666] leading-relaxed">Haz clic en cualquier texto, color de fondo o imagen de la web para editarlo aquí.</div>
-      <div id="tb-sel-text" class="hidden">
-        <label class="text-[10px] text-[#888]">Contenido</label>
-        <textarea id="tb-text-input" rows="3" class="tb-input w-full rounded-md px-2 py-1.5 text-xs mt-1 resize-none"></textarea>
-      </div>
-      <div id="tb-sel-img" class="hidden">
-        <div class="aspect-video w-full rounded-md overflow-hidden bg-[#0f0f0f] mb-2 flex items-center justify-center"><img id="tb-img-preview" class="w-full h-full object-cover" alt=""></div>
-        <button id="tb-img-replace" class="tb-input w-full rounded-md py-1.5 text-xs hover:border-yellow flex items-center justify-center gap-1.5"><i data-lucide="upload" class="w-3.5 h-3.5"></i>Reemplazar imagen</button>
-        <input id="tb-img-file" type="file" accept="image/*" class="hidden">
-      </div>
+
+  <!-- inspector de la selección activa (siempre visible arriba) -->
+  <div id="tb-inspector" class="px-4 py-3 border-b border-[#e5e5e8] shrink-0 bg-[#fafafa]">
+    <div class="text-[10px] uppercase tracking-[0.18em] text-[#9b9ba1] mb-2">Selección</div>
+    <div id="tb-sel-empty" class="text-xs text-[#9b9ba1] leading-relaxed">Haz clic en cualquier elemento de la web, o despliega una caja de abajo.</div>
+
+    <div id="tb-sel-text" class="hidden">
+      <label class="text-[10px] text-[#9b9ba1]">Texto</label>
+      <textarea id="tb-text-input" rows="3" class="tb-input w-full rounded-md px-2 py-1.5 text-xs mt-1 resize-none"></textarea>
     </div>
-    <div class="tb-pane" data-pane="design"><div class="px-4 py-4"><div class="text-[10px] uppercase tracking-[0.18em] text-[#888] mb-3">Fondos de sección</div><div id="tb-bg-list" class="space-y-2"></div></div></div>
-    <div class="tb-pane hidden" data-pane="text"><div class="px-4 py-4"><div class="text-[10px] uppercase tracking-[0.18em] text-[#888] mb-3">Todos los textos</div><div id="tb-text-list" class="space-y-1"></div></div></div>
-    <div class="tb-pane hidden" data-pane="img"><div class="px-4 py-4"><div class="text-[10px] uppercase tracking-[0.18em] text-[#888] mb-3">Imágenes y fotos</div><div id="tb-img-grid" class="grid grid-cols-3 gap-2"></div><div class="text-[10px] text-[#666] mt-3 leading-relaxed">Clic en una miniatura, o directamente sobre la imagen en la web, para reemplazarla.</div></div></div>
+
+    <div id="tb-sel-media" class="hidden">
+      <div class="aspect-video w-full rounded-md overflow-hidden bg-[#eeeeef] mb-2 flex items-center justify-center border border-[#e5e5e8]" id="tb-media-preview-wrap">
+        <img id="tb-img-preview" class="w-full h-full object-cover hidden" alt="">
+        <video id="tb-video-preview" class="w-full h-full object-cover hidden" muted loop autoplay playsinline></video>
+      </div>
+      <button id="tb-media-replace" class="tb-input w-full rounded-md py-1.5 text-xs hover:border-[#B98A4B] flex items-center justify-center gap-1.5"><i data-lucide="upload" class="w-3.5 h-3.5"></i>Reemplazar imagen o vídeo</button>
+      <input id="tb-media-file" type="file" accept="image/*,video/*" class="hidden">
+    </div>
+
+    <div id="tb-sel-bg" class="hidden flex items-center justify-between gap-2">
+      <span class="text-xs text-[#5c5c63]">Color de fondo</span>
+      <input id="tb-bg-input" type="color" class="tb-swatch">
+    </div>
   </div>
-  <div class="border-t border-[#2c2c2c] p-3 flex gap-2">
+
+  <!-- acordeón: una caja por slide -->
+  <div class="flex-1 overflow-y-auto px-3 py-3 bg-[#f5f5f6]">
+    <div class="text-[10px] uppercase tracking-[0.18em] text-[#9b9ba1] mb-2 px-1">Slides — arrastra para reordenar</div>
+    <div id="tb-slide-list" class="space-y-2"></div>
+  </div>
+
+  <div class="border-t border-[#e5e5e8] p-3 flex gap-2 shrink-0 bg-white">
     <button id="tb-export" class="flex-1 bg-yellow text-navy rounded-md py-2 text-xs font-semibold flex items-center justify-center gap-1.5 hover:opacity-90"><i data-lucide="download" class="w-3.5 h-3.5"></i>Exportar</button>
-    <button id="tb-reset" class="px-3 bg-[#2a2a2a] rounded-md py-2 text-xs hover:bg-[#3a2a2a] hover:text-red-300" title="Restablecer todo"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i></button>
+    <button id="tb-reset" class="px-3 bg-[#f0f0f1] text-[#5c5c63] rounded-md py-2 text-xs hover:bg-[#fde9e9] hover:text-red-600" title="Restablecer todo"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i></button>
   </div>
 </aside>
-<button id="tb-reopen" style="display:none" class="fixed top-1/2 right-0 -translate-y-1/2 z-[59] bg-[#181818] text-white px-2 py-3 rounded-l-lg border border-r-0 border-[#2c2c2c]"><i data-lucide="panel-right-open" class="w-4 h-4"></i></button>
+<button id="tb-reopen" style="display:none" class="fixed top-1/2 right-0 -translate-y-1/2 z-[59] bg-white text-[#1c1c1f] px-2 py-3 rounded-l-lg border border-r-0 border-[#e5e5e8] shadow-md"><i data-lucide="panel-right-open" class="w-4 h-4"></i></button>
 
 
-<!-- ============ PARALLAX + SCROLL SUAVE ============ -->
+<!-- ============ PARALLAX + SCROLL SUAVE + MICRO-INTERACCIONES ============ -->
 <script>
 (function(){
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  if (typeof Lenis === 'undefined' || typeof gsap === 'undefined') return;
-  const lenis = new Lenis({ duration:1.1, smoothWheel:true });
-  function raf(t){ lenis.raf(t); requestAnimationFrame(raf); }
-  requestAnimationFrame(raf);
+  // Si el editor está activo (?edit=Tobalina), estas animaciones se omiten por
+  // completo: no deben interferir con la selección/arrastre del panel oculto.
+  const params = new URLSearchParams(location.search);
+  const EDITOR_ON = params.get('edit') === 'Tobalina' || params.has('tobalina');
+  if (EDITOR_ON) return;
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hasGsap  = typeof gsap !== 'undefined';
+  const hasLenis = typeof Lenis !== 'undefined';
+
+  /* ---------- scroll suave (Lenis) ---------- */
+  let lenis = null;
+  if (!reduceMotion && hasLenis) {
+    lenis = new Lenis({ duration: 1.1, smoothWheel: true });
+    (function raf(t){ lenis.raf(t); requestAnimationFrame(raf); })();
+  }
+
+  /* ---------- barra de progreso de scroll ---------- */
+  const progressBar = document.getElementById('scroll-progress');
+  function updateProgress(){
+    const h = document.documentElement;
+    const scrolled = h.scrollTop || document.body.scrollTop;
+    const max = (h.scrollHeight || document.body.scrollHeight) - h.clientHeight;
+    const pct = max > 0 ? (scrolled / max) * 100 : 0;
+    if (progressBar) progressBar.style.width = pct + '%';
+  }
+  window.addEventListener('scroll', updateProgress, { passive:true });
+  if (lenis) lenis.on('scroll', updateProgress);
+  updateProgress();
+
+  if (reduceMotion || !hasGsap) return; // a partir de aquí todo requiere GSAP
+
   gsap.registerPlugin(ScrollTrigger);
-  lenis.on('scroll', ScrollTrigger.update);
+  if (lenis) lenis.on('scroll', ScrollTrigger.update);
+
+  /* ---------- parallax por data-speed ---------- */
   gsap.utils.toArray('.parallax').forEach(el=>{
     const s = parseFloat(el.dataset.speed || '0.1');
     gsap.to(el,{ yPercent:-s*100, ease:'none', scrollTrigger:{ trigger:el.closest('section')||el, scrub:true, start:'top bottom', end:'bottom top' }});
   });
+
+  /* ---------- reveal scroll-driven (texto general) ---------- */
   gsap.utils.toArray('section').forEach(sec=>{
-    gsap.from(sec.querySelectorAll('h1,h2,h3,p,.display,#emea-grid > div'),{ opacity:0, y:36, duration:.9, ease:'power3.out', stagger:.05, scrollTrigger:{ trigger:sec, start:'top 78%' }});
+    gsap.from(sec.querySelectorAll('h1,h2,h3,p,.display,#emea-grid > div'),{
+      opacity:0, y:36, filter:'blur(4px)', duration:.9, ease:'power3.out', stagger:.05,
+      scrollTrigger:{ trigger:sec, start:'top 78%' }
+    });
   });
+
+  /* ---------- Bento Grid: entrada escalonada con leve escala ---------- */
+  const bentoGrid = document.querySelector('.bento-grid');
+  if (bentoGrid) {
+    gsap.from(bentoGrid.querySelectorAll('.bento-card'), {
+      opacity:0, scale:.92, y:24, duration:.7, ease:'power3.out', stagger:.08,
+      scrollTrigger:{ trigger:bentoGrid, start:'top 80%' }
+    });
+  }
+
+  /* ---------- botones / elementos magnéticos ---------- */
+  const isFinePointer = window.matchMedia('(pointer: fine)').matches;
+  if (isFinePointer) {
+    document.querySelectorAll('.magnetic').forEach(el=>{
+      const strength = 0.35;
+      const xTo = gsap.quickTo(el, 'x', { duration:.5, ease:'power3.out' });
+      const yTo = gsap.quickTo(el, 'y', { duration:.5, ease:'power3.out' });
+      el.addEventListener('mousemove', e=>{
+        const r = el.getBoundingClientRect();
+        xTo((e.clientX - r.left - r.width/2)  * strength);
+        yTo((e.clientY - r.top  - r.height/2) * strength);
+      });
+      el.addEventListener('mouseleave', ()=>{ xTo(0); yTo(0); });
+    });
+
+    // versión sutil para los enlaces del navbar (desplazamiento menor)
+    document.querySelectorAll('.magnetic-sm').forEach(el=>{
+      const strength = 0.25;
+      const xTo = gsap.quickTo(el, 'x', { duration:.4, ease:'power3.out' });
+      const yTo = gsap.quickTo(el, 'y', { duration:.4, ease:'power3.out' });
+      el.addEventListener('mousemove', e=>{
+        const r = el.getBoundingClientRect();
+        xTo((e.clientX - r.left - r.width/2)  * strength);
+        yTo((e.clientY - r.top  - r.height/2) * strength);
+      });
+      el.addEventListener('mouseleave', ()=>{ xTo(0); yTo(0); });
+    });
+  }
 })();
 </script>
 
 
 <!-- ============ EDITOR OCULTO · SOLO ?edit=Tobalina ============ -->
+
 <script>
 (function(){
   const params = new URLSearchParams(location.search);
@@ -397,14 +535,31 @@
   const store = load();
 
   applyAll();                 // overrides para TODOS (también visitantes)
-  if (!ON) return;            // sin palabra clave → editor invisible
+  applyOrder();                // orden de secciones para TODOS
+  if (!ON) return;             // sin palabra clave → editor invisible
 
-  function load(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {text:{},bg:{},img:{}}; }catch(e){ return {text:{},bg:{},img:{}}; } }
+  function load(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {text:{},bg:{},img:{},order:null}; }catch(e){ return {text:{},bg:{},img:{},order:null}; } }
   function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }
+
   function applyAll(){
     document.querySelectorAll('[data-ek]').forEach(el=>{ const k=el.dataset.ek; if(store.text[k]!=null) el.textContent=store.text[k]; });
     document.querySelectorAll('[data-bgk]').forEach(el=>{ const k=el.dataset.bgk; if(store.bg[k]) el.style.backgroundColor=store.bg[k]; });
-    document.querySelectorAll('[data-imgk]').forEach(el=>{ const k=el.dataset.imgk; if(store.img[k]) el.src=store.img[k]; });
+    document.querySelectorAll('[data-imgk]').forEach(el=>{
+      const k=el.dataset.imgk;
+      if(store.img[k]){
+        const m = store.img[k];
+        if (typeof m === 'object' && m.type==='video') swapToVideo(el, m.src);
+        else el.src = (typeof m==='object'? m.src : m);
+      }
+    });
+  }
+  function applyOrder(){
+    if(!store.order || !Array.isArray(store.order)) return;
+    const main = document.getElementById('site');
+    store.order.forEach(id=>{
+      const sec = document.getElementById(id);
+      if(sec) main.appendChild(sec);
+    });
   }
 
   document.body.classList.add('edit-mode');
@@ -415,105 +570,256 @@
 
   let selected = null;
 
-  document.querySelectorAll('[data-ek]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault(); selectText(el);}));
-  document.querySelectorAll('[data-imgk]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault(); e.stopPropagation(); selectImg(el);}));
-  document.querySelectorAll('[data-bgk]').forEach(el=>el.addEventListener('click',e=>{ if(e.target===el) selectBg(el); }));
+  /* ---------- helpers de medios (imagen <-> vídeo) ---------- */
+  function isVideoFile(file){ return file.type.startsWith('video/'); }
+  function swapToVideo(imgEl, src){
+    if (imgEl.tagName === 'VIDEO') { imgEl.src = src; return imgEl; }
+    const v = document.createElement('video');
+    v.src = src; v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
+    v.className = imgEl.className;
+    v.dataset.imgk = imgEl.dataset.imgk;
+    imgEl.replaceWith(v);
+    return v;
+  }
+  function swapToImage(videoEl, src){
+    const img = document.createElement('img');
+    img.src = src; img.alt = videoEl.alt || '';
+    img.className = videoEl.className;
+    img.dataset.imgk = videoEl.dataset.imgk;
+    videoEl.replaceWith(img);
+    return img;
+  }
+
+  /* ---------- selección directa en la web ---------- */
+  function bindSelectable(root){
+    root.querySelectorAll('[data-ek]').forEach(el=>{
+      el.onclick = e => { e.preventDefault(); e.stopPropagation(); selectText(el); };
+    });
+    root.querySelectorAll('[data-imgk]').forEach(el=>{
+      el.onclick = e => { e.preventDefault(); e.stopPropagation(); selectMedia(el); };
+    });
+    root.querySelectorAll('[data-bgk]').forEach(el=>{
+      el.onclick = e => { if (e.target === el) selectBg(el); };
+    });
+  }
+  bindSelectable(document);
 
   function clearSel(){
     document.querySelectorAll('.tb-selected').forEach(n=>n.classList.remove('tb-selected'));
     document.querySelectorAll('[contenteditable]').forEach(n=>n.removeAttribute('contenteditable'));
     document.getElementById('tb-sel-empty').classList.remove('hidden');
     document.getElementById('tb-sel-text').classList.add('hidden');
-    document.getElementById('tb-sel-img').classList.add('hidden');
-    selected=null;
+    document.getElementById('tb-sel-media').classList.add('hidden');
+    document.getElementById('tb-sel-bg').classList.add('hidden');
+    document.querySelectorAll('.tb-item-row.active').forEach(n=>n.classList.remove('active'));
+    selected = null;
   }
+
   function selectText(el){
     clearSel(); el.classList.add('tb-selected');
     el.setAttribute('contenteditable','true'); el.focus();
-    selected={type:'text', el, key:el.dataset.ek};
+    selected = { type:'text', el, key:el.dataset.ek };
     document.getElementById('tb-sel-empty').classList.add('hidden');
     document.getElementById('tb-sel-text').classList.remove('hidden');
     document.getElementById('tb-text-input').value = el.textContent.trim();
-    el.oninput=()=>{ store.text[el.dataset.ek]=el.textContent; document.getElementById('tb-text-input').value=el.textContent; save(); };
-  }
-  function selectImg(el){
-    clearSel(); el.classList.add('tb-selected');
-    selected={type:'img', el, key:el.dataset.imgk};
-    document.getElementById('tb-sel-empty').classList.add('hidden');
-    document.getElementById('tb-sel-img').classList.remove('hidden');
-    document.getElementById('tb-img-preview').src=el.src; switchTab('img');
-  }
-  function selectBg(el){
-    clearSel(); el.classList.add('tb-selected');
-    selected={type:'bg', el, key:el.dataset.bgk};
-    document.getElementById('tb-sel-empty').textContent='Sección "'+el.dataset.bgk+'" — cambia su color en la pestaña Diseño.';
-    switchTab('design');
-    const sw=document.querySelector('[data-bgswatch="'+el.dataset.bgk+'"]'); if(sw) sw.focus();
+    el.oninput = () => { store.text[el.dataset.ek] = el.textContent; document.getElementById('tb-text-input').value = el.textContent; save(); };
+    highlightRow(el.dataset.ek);
   }
 
-  document.getElementById('tb-text-input').addEventListener('input',e=>{
-    if(selected && selected.type==='text'){ selected.el.textContent=e.target.value; store.text[selected.key]=e.target.value; save(); }
+  function selectMedia(el){
+    clearSel(); el.classList.add('tb-selected');
+    selected = { type:'media', el, key:el.dataset.imgk };
+    document.getElementById('tb-sel-empty').classList.add('hidden');
+    document.getElementById('tb-sel-media').classList.remove('hidden');
+    const imgPrev = document.getElementById('tb-img-preview');
+    const vidPrev = document.getElementById('tb-video-preview');
+    if (el.tagName === 'VIDEO') {
+      vidPrev.src = el.currentSrc || el.src; vidPrev.classList.remove('hidden'); imgPrev.classList.add('hidden');
+    } else {
+      imgPrev.src = el.src; imgPrev.classList.remove('hidden'); vidPrev.classList.add('hidden');
+    }
+    highlightRow(el.dataset.imgk);
+  }
+
+  function selectBg(el){
+    clearSel(); el.classList.add('tb-selected');
+    selected = { type:'bg', el, key:el.dataset.bgk };
+    document.getElementById('tb-sel-empty').classList.add('hidden');
+    document.getElementById('tb-sel-bg').classList.remove('hidden');
+    document.getElementById('tb-bg-input').value = store.bg[el.dataset.bgk] || rgbToHex(getComputedStyle(el).backgroundColor);
+  }
+
+  function highlightRow(key){
+    const row = document.querySelector('.tb-item-row[data-key="'+key+'"]');
+    if (row){ row.classList.add('active'); row.scrollIntoView({block:'nearest'}); }
+  }
+
+  /* ---------- inputs del inspector ---------- */
+  document.getElementById('tb-text-input').addEventListener('input', e => {
+    if (selected && selected.type==='text'){ selected.el.textContent = e.target.value; store.text[selected.key] = e.target.value; save(); }
   });
-  document.getElementById('tb-img-replace').addEventListener('click',()=>document.getElementById('tb-img-file').click());
-  document.getElementById('tb-img-file').addEventListener('change',e=>{
-    const f=e.target.files[0]; if(!f||!selected||selected.type!=='img') return;
-    const r=new FileReader();
-    r.onload=ev=>{ selected.el.src=ev.target.result; document.getElementById('tb-img-preview').src=ev.target.result; store.img[selected.key]=ev.target.result; save(); buildImgGrid(); };
+  document.getElementById('tb-bg-input').addEventListener('input', e => {
+    if (selected && selected.type==='bg'){ selected.el.style.backgroundColor = e.target.value; store.bg[selected.key] = e.target.value; save(); buildSlideList(); }
+  });
+  document.getElementById('tb-media-replace').addEventListener('click', () => document.getElementById('tb-media-file').click());
+  document.getElementById('tb-media-file').addEventListener('change', e => {
+    const f = e.target.files[0]; if(!f || !selected || selected.type!=='media') return;
+    const r = new FileReader();
+    r.onload = ev => {
+      const dataUrl = ev.target.result;
+      let newEl = selected.el;
+      if (isVideoFile(f) && newEl.tagName !== 'VIDEO') newEl = swapToVideo(newEl, dataUrl);
+      else if (!isVideoFile(f) && newEl.tagName === 'VIDEO') newEl = swapToImage(newEl, dataUrl);
+      else newEl.src = dataUrl;
+      bindSelectable(newEl.parentElement || document);
+      store.img[selected.key] = { type: isVideoFile(f)?'video':'image', src: dataUrl };
+      save();
+      selectMedia(newEl);
+      buildSlideList();
+    };
     r.readAsDataURL(f);
   });
 
-  function switchTab(name){
-    document.querySelectorAll('.tb-tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
-    document.querySelectorAll('.tb-pane').forEach(p=>p.classList.toggle('hidden', p.dataset.pane!==name));
-  }
-  document.querySelectorAll('.tb-tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
-
   function rgbToHex(rgb){ const m=(rgb||'').match(/\d+/g); if(!m) return '#000000'; return '#'+m.slice(0,3).map(x=>(+x).toString(16).padStart(2,'0')).join(''); }
 
-  function buildBgList(){
-    const wrap=document.getElementById('tb-bg-list'); wrap.innerHTML='';
-    document.querySelectorAll('[data-bgk]').forEach(el=>{
-      const k=el.dataset.bgk;
-      const cur=store.bg[k]||rgbToHex(getComputedStyle(el).backgroundColor);
-      const row=document.createElement('div'); row.className='flex items-center justify-between gap-2';
-      row.innerHTML='<span class="text-xs text-[#bbb] capitalize">'+k.replace('-',' ')+'</span>';
-      const inp=document.createElement('input'); inp.type='color'; inp.className='tb-swatch'; inp.value=cur; inp.setAttribute('data-bgswatch',k);
-      inp.addEventListener('input',()=>{ el.style.backgroundColor=inp.value; store.bg[k]=inp.value; save(); });
-      row.appendChild(inp); wrap.appendChild(row);
-    });
+  /* ===========================================================
+     ACORDEÓN DE SLIDES — una caja por <section>, con sus
+     componentes (textos, fondo, medios) y drag-and-drop
+     =========================================================== */
+  function describeEl(el){
+    if (el.hasAttribute('data-ek')) return { icon:'type', label: el.textContent.trim().slice(0,40) || '(vacío)', key: el.dataset.ek, fn:()=>selectText(el) };
+    if (el.hasAttribute('data-imgk')) return { icon: el.tagName==='VIDEO' ? 'video':'image', label: el.tagName==='VIDEO' ? 'Vídeo' : 'Imagen', key: el.dataset.imgk, fn:()=>selectMedia(el) };
   }
-  function buildTextList(){
-    const wrap=document.getElementById('tb-text-list'); wrap.innerHTML='';
-    document.querySelectorAll('[data-ek]').forEach(el=>{
-      const b=document.createElement('button');
-      b.className='w-full text-left text-xs text-[#bbb] hover:text-white hover:bg-[#222] rounded px-2 py-1.5 truncate';
-      b.textContent=el.textContent.trim()||'(vacío)';
-      b.addEventListener('click',()=>{ el.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>selectText(el),350); });
-      wrap.appendChild(b);
-    });
-  }
-  function buildImgGrid(){
-    const grid=document.getElementById('tb-img-grid'); grid.innerHTML='';
-    document.querySelectorAll('[data-imgk]').forEach(el=>{
-      const t=document.createElement('button');
-      t.className='aspect-square rounded-md overflow-hidden border border-[#2c2c2c] hover:border-yellow';
-      t.innerHTML='<img src="'+el.src+'" class="w-full h-full object-cover">';
-      t.addEventListener('click',()=>{ el.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>selectImg(el),350); });
-      grid.appendChild(t);
-    });
-  }
-  buildBgList(); buildTextList(); buildImgGrid();
 
-  const reopen=document.getElementById('tb-reopen');
-  document.getElementById('tb-close').addEventListener('click',()=>{ panel.classList.add('hidden-panel'); reopen.style.display='block'; });
-  reopen.addEventListener('click',()=>{ panel.classList.remove('hidden-panel'); reopen.style.display='none'; });
+  function buildSlideList(){
+    const wrap = document.getElementById('tb-slide-list');
+    const openIds = new Set([...wrap.querySelectorAll('.tb-slide.open')].map(n=>n.dataset.sectionId));
+    wrap.innerHTML = '';
+    const sections = [...document.querySelectorAll('#site > section')];
 
-  document.getElementById('tb-export').addEventListener('click',()=>{
-    const blob=new Blob([JSON.stringify(store,null,2)],{type:'application/json'});
-    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='savills-cambios.json'; a.click();
+    sections.forEach((sec, idx) => {
+      const id = sec.id || ('slide-'+idx);
+      const title = (sec.querySelector('[data-ek]')?.textContent.trim()) || id;
+      const bgEl = sec.matches('[data-bgk]') ? sec : sec.querySelector('[data-bgk]');
+      const textEls = [...sec.querySelectorAll('[data-ek]')];
+      const mediaEls = [...sec.querySelectorAll('[data-imgk]')];
+
+      const box = document.createElement('div');
+      box.className = 'tb-slide'; box.dataset.sectionId = sec.id; box.draggable = true;
+
+      const head = document.createElement('div');
+      head.className = 'tb-slide-head';
+      head.innerHTML =
+        '<i data-lucide="grip-vertical" class="w-3.5 h-3.5 tb-slide-handle"></i>'+
+        '<span class="tb-slide-num">'+String(idx+1).padStart(2,'0')+'</span>'+
+        '<span class="tb-slide-name">'+title+'</span>'+
+        '<i data-lucide="chevron-right" class="w-3.5 h-3.5 tb-slide-chevron"></i>';
+      head.addEventListener('click', (e) => {
+        if (e.target.closest('.tb-slide-handle')) return;
+        box.classList.toggle('open');
+        if (window.lucide) lucide.createIcons();
+      });
+
+      const body = document.createElement('div');
+      body.className = 'tb-slide-body';
+
+      if (bgEl) {
+        const r = document.createElement('div');
+        r.className = 'tb-item-row'; r.dataset.key = bgEl.dataset.bgk;
+        r.innerHTML = '<i data-lucide="paint-bucket" class="w-3.5 h-3.5 ic"></i><span class="lbl">Fondo de la sección</span>';
+        r.addEventListener('click', () => selectBg(bgEl));
+        body.appendChild(r);
+      }
+      textEls.forEach(el => {
+        const d = describeEl(el);
+        const r = document.createElement('div');
+        r.className = 'tb-item-row'; r.dataset.key = d.key;
+        r.innerHTML = '<i data-lucide="'+d.icon+'" class="w-3.5 h-3.5 ic"></i><span class="lbl">'+d.label+'</span>';
+        r.addEventListener('click', d.fn);
+        body.appendChild(r);
+      });
+      mediaEls.forEach(el => {
+        const d = describeEl(el);
+        const r = document.createElement('div');
+        r.className = 'tb-item-row'; r.dataset.key = d.key;
+        r.innerHTML = '<i data-lucide="'+d.icon+'" class="w-3.5 h-3.5 ic"></i><span class="lbl">'+d.label+'</span>';
+        r.addEventListener('click', d.fn);
+        body.appendChild(r);
+      });
+      if (!bgEl && textEls.length===0 && mediaEls.length===0) {
+        body.innerHTML = '<div class="text-[11px] text-[#666] py-1">Sin componentes editables.</div>';
+      }
+
+      box.appendChild(head); box.appendChild(body);
+      if (openIds.has(sec.id)) box.classList.add('open');
+      wrap.appendChild(box);
+    });
+
+    if (window.lucide) lucide.createIcons();
+    bindDragAndDrop();
+  }
+
+  /* ---------- drag & drop: reordenar slides (cajas del panel = secciones de la web) ---------- */
+  function bindDragAndDrop(){
+    const wrap = document.getElementById('tb-slide-list');
+    let dragEl = null;
+
+    wrap.querySelectorAll('.tb-slide').forEach(box => {
+      box.addEventListener('dragstart', e => {
+        dragEl = box; box.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      box.addEventListener('dragend', () => {
+        box.classList.remove('dragging');
+        wrap.querySelectorAll('.drag-over').forEach(n=>n.classList.remove('drag-over'));
+      });
+      box.addEventListener('dragover', e => {
+        e.preventDefault();
+        if (box !== dragEl) box.classList.add('drag-over');
+      });
+      box.addEventListener('dragleave', () => box.classList.remove('drag-over'));
+      box.addEventListener('drop', e => {
+        e.preventDefault();
+        box.classList.remove('drag-over');
+        if (!dragEl || dragEl === box) return;
+        const boxes = [...wrap.children];
+        const dragIdx = boxes.indexOf(dragEl), dropIdx = boxes.indexOf(box);
+        if (dragIdx < dropIdx) box.after(dragEl); else box.before(dragEl);
+        reorderWebToMatchPanel();
+      });
+    });
+  }
+
+  function reorderWebToMatchPanel(){
+    const wrap = document.getElementById('tb-slide-list');
+    const order = [...wrap.querySelectorAll('.tb-slide')].map(b => b.dataset.sectionId);
+    const main = document.getElementById('site');
+    order.forEach(id => { const sec = document.getElementById(id); if (sec) main.appendChild(sec); });
+    store.order = order; save();
+    renumber();
+  }
+  function renumber(){
+    document.querySelectorAll('#tb-slide-list .tb-slide').forEach((box, i) => {
+      const numEl = box.querySelector('.tb-slide-num');
+      if (numEl) numEl.textContent = String(i+1).padStart(2,'0');
+    });
+  }
+
+  buildSlideList();
+
+  /* ---------- cerrar / reabrir panel ---------- */
+  const reopen = document.getElementById('tb-reopen');
+  document.getElementById('tb-close').addEventListener('click', () => { panel.classList.add('hidden-panel'); reopen.style.display='block'; });
+  reopen.addEventListener('click', () => { panel.classList.remove('hidden-panel'); reopen.style.display='none'; });
+
+  /* ---------- exportar / reset ---------- */
+  document.getElementById('tb-export').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(store,null,2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'savills-cambios.json'; a.click();
   });
-  document.getElementById('tb-reset').addEventListener('click',()=>{
-    if(!confirm('¿Restablecer TODOS los cambios? No se puede deshacer.')) return;
+  document.getElementById('tb-reset').addEventListener('click', () => {
+    if(!confirm('¿Restablecer TODOS los cambios? Esta acción no se puede deshacer.')) return;
     localStorage.removeItem(STORE_KEY); location.reload();
   });
 })();
