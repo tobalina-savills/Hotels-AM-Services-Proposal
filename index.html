@@ -1,916 +1,523 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Savills · Asset Management Hoteles</title>
+<title>Savills · Hoteles — Propuesta de servicios</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
-<!-- Tailwind Play CDN (funciona desde file://) -->
+<!-- ============ LIBRERÍAS (CDN) ============ -->
 <script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+
 <script>
   tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          savills: {
-            yellow: '#FFD500',
-            red: '#E2231A',
-            navy: '#1A1E2E',
-            gray: '#D4D4D2',
-            graydark: '#B8B8B6',
-          },
-        },
-        fontFamily: {
-          serif: ['"Playfair Display"', 'Georgia', 'serif'],
-          sans: ['Inter', 'Helvetica', 'Arial', 'sans-serif'],
-        },
-        letterSpacing: { widest2: '0.18em' },
+    theme: { extend: {
+      colors: {
+        navy:   '#25273a',
+        navytx: '#1a1e2e',
+        cream:  '#eee8e3',
+        yellow: '#FFDF00',
       },
-    },
+      fontFamily: {
+        display: ['"Playfair Display"', 'serif'],
+        sans:    ['Inter', 'system-ui', 'sans-serif'],
+      },
+    }},
   };
 </script>
 
 <style>
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body { margin: 0; font-family: 'Inter', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; background: #D4D4D2; }
-  ::selection { background: #FFD500; color: #1A1E2E; }
+  html, body { background:#25273a; }
+  ::selection { background:#FFDF00; color:#25273a; }
+  .display { font-family:"Playfair Display", serif; }
 
-  /* --- Animaciones de entrada (sustituto de Framer Motion) --- */
-  .reveal { opacity: 0; transform: translateY(28px); transition: opacity .8s cubic-bezier(.22,1,.36,1), transform .8s cubic-bezier(.22,1,.36,1); }
-  .reveal.is-visible { opacity: 1; transform: none; }
-
-  @keyframes navDrop { from { opacity: 0; transform: translateY(-40px);} to { opacity: 1; transform: none;} }
-  .nav-drop { animation: navDrop .6s cubic-bezier(.22,1,.36,1) both; }
-
-  @keyframes coverUp { from { opacity: 0; transform: translateY(30px);} to { opacity: 1; transform: none;} }
-  .cover-up { animation: coverUp .9s cubic-bezier(.22,1,.36,1) both; }
-
-  @keyframes badgePop { from { opacity: 0; transform: scale(.85);} to { opacity: 1; transform: scale(1);} }
-  .badge-pop { animation: badgePop .7s cubic-bezier(.22,1,.36,1) .4s both; }
-
-  @keyframes drawDonut { from { opacity: 0; } to { opacity: 1; } }
-  .donut-arc { opacity: 0; animation: drawDonut .8s ease-out forwards; }
-
-  /* --- Edición --- */
-  .tbl-editable { outline: none; border-radius: 2px; transition: box-shadow .15s ease; }
-  body.edit-mode .tbl-editable { cursor: text; }
-  body.edit-mode .tbl-editable:hover { box-shadow: 0 0 0 1px rgba(59,130,246,.45); }
-  body.edit-mode .tbl-editable:focus { box-shadow: 0 0 0 2px #3b82f6; background: rgba(59,130,246,.06); }
-
-  .img-edit-overlay { opacity: 0; transition: opacity .2s ease; }
-  body.edit-mode .img-edit-wrap:hover .img-edit-overlay { opacity: 1; }
-
-  .scrollbar-dark::-webkit-scrollbar { width: 6px; }
-  .scrollbar-dark::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
-  .scrollbar-dark::-webkit-scrollbar-track { background: transparent; }
-
-  .case-card:hover .case-img { transform: scale(1.08); }
-  .case-img { transition: transform .7s cubic-bezier(.22,1,.36,1); }
-
-  .dragging { opacity: .4; }
-  .drag-over { box-shadow: inset 0 0 0 2px #FFD500; }
-
-  @media print {
-    .no-print { display: none !important; }
-    body { background: #fff !important; }
-    .reveal { opacity: 1 !important; transform: none !important; }
-    section { page-break-inside: avoid; }
+  /* textura sutil tipo deck Savills (sustituye al asset de Figma, siempre disponible) */
+  .savills-texture {
+    background-color:#25273a;
+    background-image:
+      linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size:72px 72px;
   }
+  .savills-overlay { background:linear-gradient(to bottom, #25273a 0%, rgba(37,39,58,.5) 50%, rgba(37,39,58,.25) 100%); }
+
+  /* logo savills */
+  .savills-mark { background:#FFDF00; color:#d50000; font-family:"Playfair Display",serif; font-weight:600; }
+
+  /* editor */
+  body.edit-mode [data-ek], body.edit-mode [data-imgk], body.edit-mode [data-bgk] { cursor:pointer; }
+  body.edit-mode [data-ek]:hover, body.edit-mode [data-imgk]:hover { outline:1.5px dashed #FFDF00; outline-offset:3px; }
+  body.edit-mode [data-bgk]:hover { outline:1.5px dashed rgba(255,223,0,.5); outline-offset:-1.5px; }
+  .tb-selected { outline:2px solid #FFDF00 !important; outline-offset:3px; }
+  [contenteditable="true"] { outline:2px solid #FFDF00; outline-offset:4px; border-radius:2px; }
+
+  #tb-panel { transition:transform .35s cubic-bezier(.22,1,.36,1); }
+  #tb-panel.hidden-panel { transform:translateX(108%); }
+  .tb-tab.active { background:#2c2c2c; color:#fff; }
+  .tb-input { background:#1c1c1c; border:1px solid #333; color:#e7e7e7; }
+  .tb-input:focus { outline:none; border-color:#FFDF00; }
+  input[type="color"].tb-swatch { -webkit-appearance:none; appearance:none; border:1px solid #333; border-radius:6px; padding:0; width:38px; height:32px; cursor:pointer; background:transparent; }
+  input[type="color"].tb-swatch::-webkit-color-swatch-wrapper { padding:2px; }
+  input[type="color"].tb-swatch::-webkit-color-swatch { border:none; border-radius:4px; }
+
+  .ph-section { border-top:1px dashed rgba(37,39,58,.18); }
+  @media (prefers-reduced-motion: reduce){ *{scroll-behavior:auto !important;} }
 </style>
 </head>
-<body>
-<div id="root"></div>
 
-<!-- React + ReactDOM via CDN (UMD, sin transpilacion en navegador) -->
-<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<body class="bg-navy text-cream font-sans antialiased overflow-x-hidden">
 
-<!-- Pantalla de fallback: si algo no carga, esto se ve en vez de un gris vacio -->
-<div id="boot-status" style="position:fixed;inset:0;background:#D4D4D2;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;color:#1A1E2E;font-size:14px;z-index:9999;">
-  Cargando aplicacion...
-</div>
+<!-- ============ NAVBAR ============ -->
+<header class="fixed top-0 left-0 w-full z-40">
+  <div class="h-16 px-6 md:px-10 flex items-center justify-between text-cream backdrop-blur-[2px]">
+    <span class="text-[11px] tracking-[0.18em] font-medium" data-ek="nav.client">NOMBRE CLIENTE</span>
+    <nav class="hidden lg:flex gap-7 text-[13px] font-medium">
+      <a href="#porque" class="hover:text-yellow transition-colors" data-ek="nav.l1">Savills en el mundo</a>
+      <a href="#equipo" class="hover:text-yellow transition-colors" data-ek="nav.l2">Equipo</a>
+      <a href="#servicios" class="hover:text-yellow transition-colors" data-ek="nav.l3">Servicios</a>
+      <a href="#cartera" class="hover:text-yellow transition-colors" data-ek="nav.l4">Cartera</a>
+      <a href="#credenciales" class="hover:text-yellow transition-colors" data-ek="nav.l5">Credenciales</a>
+      <a href="#contacta" class="hover:text-yellow transition-colors" data-ek="nav.l6">Contacta</a>
+    </nav>
+    <span class="text-[11px] tracking-[0.18em] font-bold" data-ek="nav.brand">SAVILLS</span>
+  </div>
+</header>
+
+<main id="site">
+
+  <!-- ===== 01 · COVER ===== -->
+  <section id="cover" data-bgk="cover" class="savills-texture relative min-h-screen flex items-center justify-center overflow-hidden">
+    <div class="parallax absolute inset-0 savills-overlay" data-speed="-0.15"></div>
+    <div class="relative text-center px-6">
+      <h1 class="parallax display text-white text-[20vw] md:text-[96px] leading-[0.9]" data-speed="0.08" data-ek="cover.title">Hoteles</h1>
+      <p class="mt-3 text-[12px] md:text-[14px] tracking-[0.28em] uppercase text-white/90" data-ek="cover.sub">Asset Management. Propuesta de servicios</p>
+    </div>
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 savills-mark w-[88px] h-[88px] rounded-[2px] flex items-center justify-center text-2xl lowercase">savills</div>
+  </section>
+
+  <!-- ===== 02 · SAVILLS EN EL MUNDO (diseño real del Figma: "Presencia Global · Desktop") ===== -->
+  <section id="porque" data-bgk="porque" class="bg-[#1a1e2e] text-cream py-24 md:py-32 overflow-hidden">
+    <div class="max-w-[1294px] mx-auto px-6 md:px-16">
+      <div class="flex flex-col lg:flex-row gap-12 lg:gap-12 lg:items-end">
+
+        <!-- Columna izquierda: titular + cifras IBERIA -->
+        <div class="flex flex-col gap-5 w-full lg:w-[340px] shrink-0">
+          <h2 class="display text-3xl md:text-[40px] leading-[1.1] text-cream" data-ek="porque.title">Presencia global, experiencia local</h2>
+          <p class="text-[13px] md:text-[14px] text-cream/70 leading-relaxed" data-ek="porque.intro">Estés donde estés, cuéntanos tus necesidades y objetivos y uniremos las diversas perspectivas de nuestros profesionales en un equipo a tu medida para obtener los mejores resultados.</p>
+
+          <div class="h-px w-full bg-cream/20 mt-1"></div>
+
+          <span class="bg-yellow text-navy text-[12px] font-medium px-2.5 py-1 self-start" data-ek="porque.ib.tag">IBERIA</span>
+
+          <div class="flex items-center gap-2.5 w-full">
+            <span class="display text-3xl shrink-0" data-ek="porque.ib.1.n">+35</span>
+            <span class="text-[11px] text-cream/85" data-ek="porque.ib.1.l">Años de experiencia</span>
+          </div>
+          <div class="h-px w-full bg-cream/20"></div>
+
+          <div class="flex items-center gap-2.5 w-full">
+            <span class="display text-3xl shrink-0" data-ek="porque.ib.2.n">+1000</span>
+            <span class="text-[11px] text-cream/85" data-ek="porque.ib.2.l">Empleados en España y Portugal</span>
+          </div>
+          <div class="h-px w-full bg-cream/20"></div>
+
+          <div class="flex items-center gap-2.5 w-full">
+            <span class="display text-3xl shrink-0" data-ek="porque.ib.3.n">217 M€</span>
+            <span class="text-[11px] text-cream/85" data-ek="porque.ib.3.l">Facturación Iberia 2025</span>
+          </div>
+          <div class="h-px w-full bg-cream/20"></div>
+
+          <div class="flex items-start gap-1.5 w-full">
+            <span class="display text-3xl shrink-0" data-ek="porque.ib.4.n">8</span>
+            <p class="text-[11px] leading-relaxed pt-1.5"><span class="text-cream" data-ek="porque.ib.4.l">Oficinas: </span><span class="text-cream/65" data-ek="porque.ib.4.cities">Lisboa, Oporto, Madrid, Barcelona, Málaga, Marbella, Sevilla y Valencia</span></p>
+          </div>
+        </div>
+
+        <!-- Centro: mapa / imagen (placeholder editable — el frame de Figma estaba vacío) -->
+        <div class="parallax relative w-full lg:w-[664px] aspect-[664/587] shrink-0 rounded-sm overflow-hidden bg-white/5 border border-white/10" data-speed="0.06">
+          <img data-imgk="porque.map" alt="Mapa de presencia global Savills"
+               class="w-full h-full object-cover"
+               src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='664' height='587'><rect width='664' height='587' fill='%232a2e42'/><text x='50%25' y='50%25' fill='%23ffffff55' font-family='Inter' font-size='14' text-anchor='middle'>Mapa / imagen — sustituir desde el editor</text></svg>">
+        </div>
+
+        <!-- Columna derecha: cifras SAVILLS EN EL MUNDO -->
+        <div class="flex flex-col gap-5 w-full lg:w-[198px] shrink-0">
+          <span class="bg-yellow text-navy text-[12px] font-medium px-2.5 py-1 self-start" data-ek="porque.gl.tag">SAVILLS EN EL MUNDO</span>
+
+          <div class="flex flex-col gap-1">
+            <span class="display text-3xl" data-ek="porque.gl.1.n">+42.000</span>
+            <span class="text-[11px] text-cream/85" data-ek="porque.gl.1.l">Empleados en el mundo</span>
+          </div>
+          <div class="h-px w-full bg-cream/20"></div>
+
+          <div class="flex flex-col gap-1">
+            <span class="display text-3xl" data-ek="porque.gl.2.n">+700</span>
+            <span class="text-[11px] text-cream/85" data-ek="porque.gl.2.l">Oficinas y asociados</span>
+          </div>
+          <div class="h-px w-full bg-cream/20"></div>
+
+          <div class="flex flex-col gap-1.5">
+            <span class="display text-3xl" data-ek="porque.gl.3.n">2,6 MM£</span>
+            <span class="text-[11px] text-cream/85" data-ek="porque.gl.3.l">Facturación global grupo 2025</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 03 · EQUIPO (diseño real del Figma) ===== -->
+  <section id="equipo" data-bgk="equipo" class="savills-texture relative overflow-hidden pt-28 md:pt-36">
+    <div class="parallax absolute inset-0 savills-overlay" data-speed="-0.1"></div>
+
+    <!-- header -->
+    <div class="relative text-center px-6 max-w-[680px] mx-auto">
+      <h2 class="parallax display text-3xl md:text-[34px] text-cream" data-speed="0.05" data-ek="equipo.title">Tu equipo de Savills</h2>
+      <p class="text-[13px] text-cream/85 mt-3 leading-relaxed" data-ek="equipo.intro">Cualquiera que sea tu objetivo inmobiliario, te ayudamos a tomar las mejores decisiones gracias a información constantemente actualizada y a nuestra experiencia a la vanguardia del sector.</p>
+    </div>
+
+    <!-- Iberia destacado -->
+    <div class="relative mt-12 flex flex-col items-center px-6">
+      <span class="savills-mark text-navy px-3 py-1 text-[11px] tracking-[0.18em] font-semibold" style="color:#25273a">IBERIA</span>
+      <div id="iberia-lead" class="mt-7 flex flex-col items-center text-center"></div>
+      <div class="w-px h-12 bg-yellow my-7"></div>
+      <div id="iberia-grid" class="flex flex-wrap gap-x-10 gap-y-8 justify-center max-w-[760px]"></div>
+    </div>
+
+    <!-- Directorio EMEA (barra blanca inferior) -->
+    <div data-bgk="equipo-bar" class="relative bg-white text-navytx mt-16 px-6 md:px-[60px] py-10">
+      <div id="emea-grid" class="max-w-[1440px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-10"></div>
+    </div>
+  </section>
+
+  <!-- ===== 04 · SERVICIOS (a completar) ===== -->
+  <section id="servicios" data-bgk="servicios" class="bg-cream text-navytx py-28 md:py-40">
+    <div class="max-w-[1200px] mx-auto px-6 md:px-10">
+      <span class="text-[10px] uppercase tracking-[0.22em] text-navytx/45" data-ek="serv.kicker">02 — Servicios</span>
+      <h2 class="display text-4xl md:text-6xl mt-4 mb-14" data-ek="serv.title">Qué hacemos</h2>
+      <div class="grid md:grid-cols-2 gap-x-16 gap-y-8">
+        <div class="ph-section pt-5 flex justify-between items-baseline"><span class="display text-2xl" data-ek="serv.1">Hotel Capital Markets</span><span class="text-xs text-navytx/40" data-ek="serv.1n">01</span></div>
+        <div class="ph-section pt-5 flex justify-between items-baseline"><span class="display text-2xl" data-ek="serv.2">Asset Management & Advisory</span><span class="text-xs text-navytx/40" data-ek="serv.2n">02</span></div>
+        <div class="ph-section pt-5 flex justify-between items-baseline"><span class="display text-2xl" data-ek="serv.3">Valuations</span><span class="text-xs text-navytx/40" data-ek="serv.3n">03</span></div>
+        <div class="ph-section pt-5 flex justify-between items-baseline"><span class="display text-2xl" data-ek="serv.4">Strategic Consultancy</span><span class="text-xs text-navytx/40" data-ek="serv.4n">04</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 05 · CARTERA (a completar) ===== -->
+  <section id="cartera" data-bgk="cartera" class="savills-texture relative text-cream py-28 md:py-40 overflow-hidden">
+    <div class="relative max-w-[1200px] mx-auto px-6 md:px-10">
+      <span class="text-[10px] uppercase tracking-[0.22em] text-cream/45" data-ek="cart.kicker">03 — Cartera</span>
+      <h2 class="display text-4xl md:text-6xl mt-4 mb-14 text-white" data-ek="cart.title">Operaciones de referencia</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="aspect-[4/3] rounded-lg overflow-hidden bg-white/5 border border-white/10"><img data-imgk="cart.1" alt="" class="w-full h-full object-cover opacity-80" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='400' height='300' fill='%2333364d'/></svg>"></div>
+        <div class="aspect-[4/3] rounded-lg overflow-hidden bg-white/5 border border-white/10"><img data-imgk="cart.2" alt="" class="w-full h-full object-cover opacity-80" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='400' height='300' fill='%2333364d'/></svg>"></div>
+        <div class="aspect-[4/3] rounded-lg overflow-hidden bg-white/5 border border-white/10"><img data-imgk="cart.3" alt="" class="w-full h-full object-cover opacity-80" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='400' height='300' fill='%2333364d'/></svg>"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 06 · CREDENCIALES (a completar) ===== -->
+  <section id="credenciales" data-bgk="credenciales" class="bg-cream text-navytx py-28 md:py-40">
+    <div class="max-w-[1200px] mx-auto px-6 md:px-10">
+      <span class="text-[10px] uppercase tracking-[0.22em] text-navytx/45" data-ek="cred.kicker">04 — Credenciales</span>
+      <h2 class="display text-4xl md:text-6xl mt-4 mb-14" data-ek="cred.title">Resultados que avalan</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-10">
+        <div><div class="display text-6xl text-navy" data-ek="cred.1.n">€12bn</div><div class="text-xs uppercase tracking-[0.18em] text-navytx/55 mt-2" data-ek="cred.1.l">Transaccionados</div></div>
+        <div><div class="display text-6xl text-navy" data-ek="cred.2.n">+400</div><div class="text-xs uppercase tracking-[0.18em] text-navytx/55 mt-2" data-ek="cred.2.l">Activos</div></div>
+        <div><div class="display text-6xl text-navy" data-ek="cred.3.n">14</div><div class="text-xs uppercase tracking-[0.18em] text-navytx/55 mt-2" data-ek="cred.3.l">Mercados</div></div>
+        <div><div class="display text-6xl text-navy" data-ek="cred.4.n">#1</div><div class="text-xs uppercase tracking-[0.18em] text-navytx/55 mt-2" data-ek="cred.4.l">Hotel advisory</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 07 · CONTACTA ===== -->
+  <section id="contacta" data-bgk="contacta" class="savills-texture relative text-cream py-28 md:py-44 overflow-hidden">
+    <div class="parallax absolute -bottom-24 -right-10 opacity-[0.06] display text-[30vw] text-white pointer-events-none select-none" data-speed="0.2">savills</div>
+    <div class="relative max-w-[1200px] mx-auto px-6 md:px-10">
+      <span class="text-[10px] uppercase tracking-[0.22em] text-cream/45" data-ek="cta.kicker">05 — Contacta</span>
+      <h2 class="display text-[11vw] md:text-[72px] leading-[0.95] text-white mt-5 max-w-3xl" data-ek="cta.title">Hablemos de tu activo.</h2>
+      <a href="mailto:hoteles@savills.es" class="group inline-flex items-center gap-3 mt-9 text-2xl md:text-3xl display border-b-2 border-yellow pb-1 text-white">
+        <span data-ek="cta.mail">hoteles@savills.es</span>
+        <i data-lucide="arrow-up-right" class="w-7 h-7 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
+      </a>
+      <footer class="mt-28 flex flex-col md:flex-row justify-between gap-3 text-xs text-cream/45 border-t border-white/10 pt-8">
+        <span data-ek="foot.l">Savills · Hoteles EMEA — Madrid</span>
+        <span data-ek="foot.r">Propuesta confidencial</span>
+      </footer>
+    </div>
+  </section>
+
+</main>
+
+
+<!-- ============ DATOS DEL EQUIPO + RENDER (antes del editor) ============ -->
 <script>
-  window.addEventListener('error', function(e){
-    var el = document.getElementById('boot-status');
-    if(el){ el.style.display='flex'; el.innerHTML = '<div style="max-width:600px;padding:24px;text-align:left;"><b>Error al cargar la pagina:</b><br><br>' + (e.message||e) + '<br><br><small>Revisa la consola (F12) para mas detalle.</small></div>'; }
+(function(){
+  // avatar neutro (vacío, como en Figma) — siempre disponible, reemplazable desde el editor
+  const AV = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect width='120' height='120' fill='%23cfd2d9'/></svg>";
+
+  const lead = { id:'lead', name:'Juan Garnica', role:'Head of Hotels' };
+  const iberia = [
+    { id:'ib0', name:'María Calvo',     role:'Director Hotel Asset Management & Advisory' },
+    { id:'ib1', name:'Javier Oroz',     role:'Director Hotel Capital Markets' },
+    { id:'ib2', name:'Sandra López',    role:'Director Hotel Valuations' },
+    { id:'ib3', name:'Jesús Rodríguez', role:'Director Hotel Strategic Consultancy' },
+  ];
+  const emea = [
+    { label:'EMEA', people:[
+      ['em0','David Kellett','Head of Hotel, Capital Markets, EMEA'],
+      ['em1','Thomas Emanuel','Head of Hospitality. Thought Leadership, EMEA'],
+      ['em2','Richard Dawes','Director Hotel Capital Markets, EMEA'],
+    ]},
+    { label:'UK', people:[
+      ['uk0',"Joshua O'Rourke",'Director. Hotel Capital Markets'],
+      ['uk1','Phoenix Chow','Director. Hotel Capital Markets'],
+    ], sub:{ label:'IRLANDA', people:[
+      ['ir0','Tom Barrett','Director, Hotels & Leisure Irlanda'],
+    ]}},
+    { label:'ALEMANIA', people:[
+      ['de0','Tina Haller','Head of Hotels, Alemania'],
+      ['de1','Max Jedlicki','Head of Corporate Finance, Europe Norte y Central'],
+    ]},
+    { label:'P. BAJOS', people:[
+      ['nl0','Bas Wilberts','Head of Investment, Países Bajos'],
+    ], sub:{ label:'ITALIA', people:[
+      ['it0','Dario Leone','Head of Hospitality & Leisure, Italia'],
+    ]}},
+  ];
+
+  // --- Iberia lead (círculo grande) ---
+  document.getElementById('iberia-lead').innerHTML =
+    '<div class="w-[120px] h-[120px] rounded-full overflow-hidden mb-3"><img data-imgk="av.'+lead.id+'" src="'+AV+'" class="w-full h-full object-cover" alt=""></div>'+
+    '<p class="text-white text-[13px] font-semibold" data-ek="t.'+lead.id+'.n">'+lead.name+'</p>'+
+    '<p class="text-white/60 text-[11px]" data-ek="t.'+lead.id+'.r">'+lead.role+'</p>';
+
+  // --- Iberia grid (4 directores) ---
+  document.getElementById('iberia-grid').innerHTML = iberia.map(p =>
+    '<div class="w-[120px] flex flex-col items-center text-center">'+
+      '<div class="w-[80px] h-[80px] rounded-full overflow-hidden mb-3"><img data-imgk="av.'+p.id+'" src="'+AV+'" class="w-full h-full object-cover" alt=""></div>'+
+      '<p class="text-white text-[12px] font-semibold leading-tight" data-ek="t.'+p.id+'.n">'+p.name+'</p>'+
+      '<p class="text-white/60 text-[10px] leading-tight mt-0.5" data-ek="t.'+p.id+'.r">'+p.role+'</p>'+
+    '</div>').join('');
+
+  // --- EMEA directory ---
+  function person(p){
+    return '<div class="flex gap-3 items-center">'+
+      '<div class="w-10 h-10 rounded-sm overflow-hidden shrink-0"><img data-imgk="av.'+p[0]+'" src="'+AV+'" class="w-full h-full object-cover" alt=""></div>'+
+      '<div class="min-w-0"><p class="text-navytx text-[12px] font-semibold truncate" data-ek="t.'+p[0]+'.n">'+p[1]+'</p>'+
+      '<p class="text-navytx/55 text-[10px] leading-tight" data-ek="t.'+p[0]+'.r">'+p[2]+'</p></div></div>';
+  }
+  function group(label, people, key){
+    return '<p class="text-[10px] tracking-[0.16em] text-navytx/45 font-medium mb-3" data-ek="grp.'+key+'">'+label+'</p>'+
+      '<div class="space-y-3">'+people.map(person).join('')+'</div>';
+  }
+  document.getElementById('emea-grid').innerHTML = emea.map((col,i)=>{
+    let html = '<div>'+group(col.label, col.people, 'c'+i);
+    if(col.sub) html += '<div class="mt-5">'+group(col.sub.label, col.sub.people, 'c'+i+'s')+'</div>';
+    return html+'</div>';
+  }).join('');
+})();
+</script>
+
+
+<!-- ============ EDITOR OCULTO (panel) ============ -->
+<aside id="tb-panel" class="fixed top-0 right-0 h-screen w-[320px] z-[60] bg-[#181818] text-[#e7e7e7] border-l border-[#2c2c2c] shadow-2xl flex-col hidden-panel" style="display:none; font-family:Inter,sans-serif;">
+  <div class="flex items-center justify-between px-4 h-12 border-b border-[#2c2c2c]">
+    <div class="flex items-center gap-2">
+      <div class="w-5 h-5 rounded-[5px] bg-yellow flex items-center justify-center text-[10px] font-bold text-navy">F</div>
+      <span class="text-sm font-medium">PPT&nbsp;to&nbsp;Figma</span>
+    </div>
+    <button id="tb-close" class="text-[#888] hover:text-white"><i data-lucide="chevrons-right" class="w-4 h-4"></i></button>
+  </div>
+  <div class="flex border-b border-[#2c2c2c] text-xs">
+    <button class="tb-tab active flex-1 py-2.5 flex items-center justify-center gap-1.5" data-tab="design"><i data-lucide="palette" class="w-3.5 h-3.5"></i>Diseño</button>
+    <button class="tb-tab flex-1 py-2.5 flex items-center justify-center gap-1.5" data-tab="text"><i data-lucide="type" class="w-3.5 h-3.5"></i>Texto</button>
+    <button class="tb-tab flex-1 py-2.5 flex items-center justify-center gap-1.5" data-tab="img"><i data-lucide="image" class="w-3.5 h-3.5"></i>Galería</button>
+  </div>
+  <div class="flex-1 overflow-y-auto">
+    <div id="tb-inspector" class="px-4 py-4 border-b border-[#2c2c2c]">
+      <div class="text-[10px] uppercase tracking-[0.18em] text-[#888] mb-2">Selección</div>
+      <div id="tb-sel-empty" class="text-xs text-[#666] leading-relaxed">Haz clic en cualquier texto, color de fondo o imagen de la web para editarlo aquí.</div>
+      <div id="tb-sel-text" class="hidden">
+        <label class="text-[10px] text-[#888]">Contenido</label>
+        <textarea id="tb-text-input" rows="3" class="tb-input w-full rounded-md px-2 py-1.5 text-xs mt-1 resize-none"></textarea>
+      </div>
+      <div id="tb-sel-img" class="hidden">
+        <div class="aspect-video w-full rounded-md overflow-hidden bg-[#0f0f0f] mb-2 flex items-center justify-center"><img id="tb-img-preview" class="w-full h-full object-cover" alt=""></div>
+        <button id="tb-img-replace" class="tb-input w-full rounded-md py-1.5 text-xs hover:border-yellow flex items-center justify-center gap-1.5"><i data-lucide="upload" class="w-3.5 h-3.5"></i>Reemplazar imagen</button>
+        <input id="tb-img-file" type="file" accept="image/*" class="hidden">
+      </div>
+    </div>
+    <div class="tb-pane" data-pane="design"><div class="px-4 py-4"><div class="text-[10px] uppercase tracking-[0.18em] text-[#888] mb-3">Fondos de sección</div><div id="tb-bg-list" class="space-y-2"></div></div></div>
+    <div class="tb-pane hidden" data-pane="text"><div class="px-4 py-4"><div class="text-[10px] uppercase tracking-[0.18em] text-[#888] mb-3">Todos los textos</div><div id="tb-text-list" class="space-y-1"></div></div></div>
+    <div class="tb-pane hidden" data-pane="img"><div class="px-4 py-4"><div class="text-[10px] uppercase tracking-[0.18em] text-[#888] mb-3">Imágenes y fotos</div><div id="tb-img-grid" class="grid grid-cols-3 gap-2"></div><div class="text-[10px] text-[#666] mt-3 leading-relaxed">Clic en una miniatura, o directamente sobre la imagen en la web, para reemplazarla.</div></div></div>
+  </div>
+  <div class="border-t border-[#2c2c2c] p-3 flex gap-2">
+    <button id="tb-export" class="flex-1 bg-yellow text-navy rounded-md py-2 text-xs font-semibold flex items-center justify-center gap-1.5 hover:opacity-90"><i data-lucide="download" class="w-3.5 h-3.5"></i>Exportar</button>
+    <button id="tb-reset" class="px-3 bg-[#2a2a2a] rounded-md py-2 text-xs hover:bg-[#3a2a2a] hover:text-red-300" title="Restablecer todo"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i></button>
+  </div>
+</aside>
+<button id="tb-reopen" style="display:none" class="fixed top-1/2 right-0 -translate-y-1/2 z-[59] bg-[#181818] text-white px-2 py-3 rounded-l-lg border border-r-0 border-[#2c2c2c]"><i data-lucide="panel-right-open" class="w-4 h-4"></i></button>
+
+
+<!-- ============ PARALLAX + SCROLL SUAVE ============ -->
+<script>
+(function(){
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (typeof Lenis === 'undefined' || typeof gsap === 'undefined') return;
+  const lenis = new Lenis({ duration:1.1, smoothWheel:true });
+  function raf(t){ lenis.raf(t); requestAnimationFrame(raf); }
+  requestAnimationFrame(raf);
+  gsap.registerPlugin(ScrollTrigger);
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.utils.toArray('.parallax').forEach(el=>{
+    const s = parseFloat(el.dataset.speed || '0.1');
+    gsap.to(el,{ yPercent:-s*100, ease:'none', scrollTrigger:{ trigger:el.closest('section')||el, scrub:true, start:'top bottom', end:'bottom top' }});
   });
+  gsap.utils.toArray('section').forEach(sec=>{
+    gsap.from(sec.querySelectorAll('h1,h2,h3,p,.display,#emea-grid > div'),{ opacity:0, y:36, duration:.9, ease:'power3.out', stagger:.05, scrollTrigger:{ trigger:sec, start:'top 78%' }});
+  });
+})();
 </script>
 
-<!-- App compilada (JSX ya transpilado a React.createElement) -->
+
+<!-- ============ EDITOR OCULTO · SOLO ?edit=Tobalina ============ -->
 <script>
-"use strict";
-const { useState, useEffect, useRef, useCallback, useLayoutEffect } = React;
-/* ============================================================
-   1. DATOS CENTRALIZADOS — fuente única de verdad
-   ============================================================ */
-const STORAGE_KEY = 'tobalina_savills_data_v2';
-const ACCESS_KEY = 'tobalina_access';
-const HOTEL = (id) => `https://images.unsplash.com/photo-${id}?q=80&w=1200&auto=format&fit=crop`;
-const INITIAL_DATA = {
-    meta: { clientName: 'NOMBRE CLIENTE', deckLabel: 'SAVILLS' },
-    nav: { items: [
-            { id: 'why', label: '¿Por qué Savills?' },
-            { id: 'team', label: 'Equipo' },
-            { id: 'services', label: 'Servicios' },
-            { id: 'portfolio', label: 'Cartera' },
-            { id: 'credentials', label: 'Credenciales' },
-            { id: 'contact', label: 'Contacta' },
-        ] },
-    sectionOrder: ['cover', 'why', 'team', 'services', 'portfolio', 'credentials', 'contact'],
-    sections: {
-        cover: {
-            id: 'cover', type: 'cover',
-            title: 'ASSET MANAGEMENT',
-            subtitle: 'PRESENTACIÓN DE SERVICIOS. HOTELES',
-            backgroundImage: HOTEL('1564501049412-61c2a3083791'),
-            backgroundColor: '#1a1410',
-        },
-        why: {
-            id: 'why', type: 'global-presence',
-            label: '¿Por qué Savills?',
-            title: 'Presencia global,', titleItalic: 'experiencia local',
-            description: 'Estés donde estés, cuéntanos tus necesidades y objetivos y uniremos las diversas perspectivas de nuestros profesionales en un equipo a tu medida para obtener los mejores resultados.',
-            backgroundColor: '#1A1E2E',
-            stats: {
-                left: { heading: 'Savills', headingItalic: 'en el mundo', items: [
-                        { id: 'w1', value: '+42.000', label: 'Empleados en el mundo' },
-                        { id: 'w2', value: '+700', label: 'Oficinas y asociados' },
-                        { id: 'w3', value: '2,6 MM£', label: 'Facturación global grupo 2025' },
-                    ] },
-                right: { heading: 'Iberia', items: [
-                        { id: 'i1', value: '+35', label: 'Años' },
-                        { id: 'i2', value: '+1000', label: 'Empleados' },
-                        { id: 'i3', value: '217 M€', label: 'Facturación España 2025' },
-                        { id: 'i4', value: '+35', label: 'Oficinas: Lisboa, Oporto, Madrid, Barcelona, Málaga, Marbella, Sevilla y Valencia' },
-                    ] },
-            },
-            mapMarkers: [
-                { id: 'america', label: 'Oficinas en', region: 'AMÉRICA', value: '47', x: 22, y: 48 },
-                { id: 'spain', label: 'Oficinas en', region: 'ESPAÑA', value: '6', x: 47, y: 56 },
-                { id: 'emea', label: 'Oficinas en', region: 'EMEA', value: '196', x: 50, y: 38 },
-                { id: 'apac', label: 'Oficinas en', region: 'APAC', value: '65', x: 66, y: 48 },
-            ],
-        },
-        team: {
-            id: 'team', type: 'team-emea',
-            label: 'Equipo', title: 'Equipo EMEA',
-            description: 'Cualquiera que sea tu objetivo inmobiliario, te ayudamos a tomar las mejores decisiones gracias a información constantemente actualizada y a nuestra experiencia a la vanguardia del sector.',
-            backgroundColor: '#D4D4D2',
-            iberiaBlock: {
-                heading: 'IBERIA',
-                people: [
-                    { id: 'p1', name: 'Juan Garnica', role: 'Head of Hotels', photo: '' },
-                    { id: 'p2', name: 'María Calvo', role: 'Director Hotel Asset Management & Advisory', photo: '' },
-                    { id: 'p3', name: 'Javier Oroz', role: 'Director Hotel Capital Markets.', photo: '' },
-                    { id: 'p4', name: 'Sandra López', role: 'Director Hotel Valuations', photo: '' },
-                    { id: 'p5', name: 'Jesús Rodríguez', role: 'Director Hotel Strategic Consultancy', photo: '' },
-                ],
-                statsLabel: '23 EMPLEADOS',
-                stats: [
-                    { id: 's1', value: '5', label: 'Directores' },
-                    { id: 's2', value: '6', label: 'asociados' },
-                    { id: 's3', value: '8', label: 'consultores' },
-                    { id: 's4', value: '4', label: 'soporte' },
-                ],
-            },
-            regionColumns: [
-                { id: 'emea-col', regionLabel: 'EMEA', people: [
-                        { id: 'e1', name: 'David Kellett', role: 'Head of Hotel, Capital Markets, EMEA', photo: '' },
-                        { id: 'e2', name: 'Thomas Emanuel', role: 'Head of Hospitality. Thought Leadership, EMEA', photo: '' },
-                        { id: 'e3', name: 'Richard Dawes', role: 'Director Hotel Capital Markets, EMEA', photo: '' },
-                    ] },
-                { id: 'uk-col', regionLabel: 'UK', people: [
-                        { id: 'u1', name: 'Joshua O’Rourke', role: 'Director. Hotel Capital Markets', photo: '' },
-                        { id: 'u2', name: 'Phoenix Chow', role: 'Director. Hotel Capital Markets', photo: '' },
-                    ] },
-            ],
-            countryColumn: [
-                { id: 'c1', name: 'Dario Leone', role: 'Head of Hospitality & Leisure, Italia', country: 'ITALIA', photo: '' },
-                { id: 'c2', name: 'Tom Barrett', role: 'Director, Hotels & Leisure Irlanda', country: 'IRLANDA', photo: '' },
-                { id: 'c3', name: 'Bas Wilberts', role: 'Head of Investment, Países Bajos', country: 'P. BAJOS', photo: '' },
-                { id: 'c4', name: 'Tina Haller', role: 'Head of Hotels, Alemania', country: 'ALEMANIA', photo: '' },
-                { id: 'c5', name: 'Max Jedlicki', role: 'Head of Corporate Finance, Europe Norte y Central', country: 'ALEMANIA', photo: '' },
-            ],
-        },
-        services: {
-            id: 'services', type: 'services-matrix',
-            label: 'Servicios',
-            title: 'Un servicio para', titleItalic: 'cada etapa', titleSuffix: 'de tu hotel',
-            description: 'Te ofrecemos todos los servicios necesarios para cubrir las necesidades de las distintas etapas del ciclo de vida del hotel. Nuestro equipo de Asset Management optimiza el valor del activo en la operativa diaria y se apoya en equipos especializados en momentos específicos del proyecto.',
-            badge: 'CICLO DE VIDA HOTEL',
-            backgroundColor: '#D4D4D2',
-            phases: [
-                { id: 'ph1', number: '1', label: 'Desarrollo / Adquisición' },
-                { id: 'ph2', number: '2', label: 'Reforma' },
-                { id: 'ph3', number: '3', label: 'Operativa' },
-                { id: 'ph4', number: '4', label: 'Desinversión' },
-            ],
-            rows: [
-                { id: 'r1', label: 'Transacciones', cells: [
-                        ['Apoyo en proceso de compra', 'Búsqueda de operador'], [], [], ['Apoyo en proceso de venta']
-                    ] },
-                { id: 'r2', label: 'AM Operativo', highlight: true, cells: [
-                        ['Apoyo en financiación'],
-                        ['Coordinación de preapertura', 'Monitorización operativa en fase ramp-up'],
-                        ['Monitorización operativa en fase estabilizada', 'Apoyo en la refinanciación'],
-                        ['Apoyo en fase desinversión']
-                    ] },
-                { id: 'r3', label: 'AM Especializado', highlight: true, cells: [
-                        ['Due Diligence Técnica', 'Debt advisory'],
-                        ['Desarrollo técnico del proyecto (supervisión, gestión y/o ejecución) Apoyo urbanístico'],
-                        ['Revisión técnica durante Asset Management', 'Debt advisory'],
-                        []
-                    ] },
-                { id: 'r4', label: 'Consultoría', cells: [
-                        ['Análisis de viabilidad', 'Due Diligence Comercial'], ['Análisis de diagnóstico'], [], []
-                    ] },
-                { id: 'r5', label: 'Valoraciones', cells: [
-                        [], ['Valoraciones RICS', 'Valoraciones corporativas', 'Tasaciones ECO'], [], []
-                    ] },
-            ],
-            footerBar: 'OPTIMIZACIÓN IBIS, COORDINACIÓN SEGUROS, CONTABILIDAD SOCIETARIA',
-        },
-        portfolio: {
-            id: 'portfolio', type: 'portfolio-grid',
-            label: 'Cartera', title: 'Casos Relevantes',
-            backgroundColor: '#D4D4D2',
-            statsHeader: {
-                title: 'Tenemos +1,500 habitaciones',
-                subtitleItalic: 'bajo Asset Management en los principales destinos españoles',
-                description: 'El equipo tiene un sólido track record en el sector y trabaja tanto para inversores privados como institucionales.',
-            },
-            donuts: [
-                { id: 'd1', label: 'Marca', segments: [
-                        { id: 'd1s1', name: 'Internacional', value: 25, color: '#FFD500' },
-                        { id: 'd1s2', name: 'Local', value: 57, color: '#1A1E2E' },
-                        { id: 'd1s3', name: 'Sin Marca', value: 18, color: '#FFFFFF' }
-                    ] },
-                { id: 'd2', label: 'Ubicación', segments: [
-                        { id: 'd2s1', name: 'Urbano', value: 60, color: '#1A1E2E' },
-                        { id: 'd2s2', name: 'Vacacional', value: 40, color: '#FFFFFF' }
-                    ] },
-                { id: 'd3', label: 'Modelo operativo', segments: [
-                        { id: 'd3s1', name: 'HMA', value: 60, color: '#1A1E2E' },
-                        { id: 'd3s2', name: 'HLA', value: 40, color: '#FFFFFF' }
-                    ] },
-                { id: 'd4', label: 'Perfil del inversor', segments: [
-                        { id: 'd4s1', name: 'Private Equity', value: 57, color: '#1A1E2E' },
-                        { id: 'd4s2', name: 'Family Office', value: 25, color: '#FFD500' },
-                        { id: 'd4s3', name: 'Inversores Privados', value: 18, color: '#FFFFFF' }
-                    ] },
-            ],
-            teamStrip: {
-                verticalLabel: 'EQUIPO',
-                people: [
-                    { id: 'tp1', name: 'María Calvo García', role: 'Directora', photo: '' },
-                    { id: 'tp2', name: 'Paloma Boves', role: 'Associate', photo: '' },
-                    { id: 'tp3', name: 'Jon Pastor', role: 'Consultant', photo: '' },
-                ],
-                bullets: [
-                    '+ 12 Años en Hotel Asset Management y consultoría',
-                    'Experiencia en todas las fases del ciclo de vida de un hotel',
-                    'Relación directa con las principales marcas y operadores',
-                    'Conocimiento profundo de los principales destinos nacionales',
-                    'Metodología de trabajo probada y ajustada a las necesidades de cada cliente',
-                ],
-            },
-            cases: [
-                { id: 'case1', name: 'Barceló Santiago', tags: ['Asset Management', 'Operativo y Especializado'], location: 'TENERIFE', rooms: '407 habitaciones.', project: 'Proyecto: 2018-Actualidad', owner: 'Propietario: Family Office', image: HOTEL('1551882547-ff40c63fe5fa') },
-                { id: 'case2', name: 'Tembo Suites', tags: ['Asset Management', 'Operativo'], location: 'BARCELONA', rooms: '280 habitaciones', project: 'Proyecto: 2024-Actualidad', owner: 'Propietario: Inversor Privado', image: HOTEL('1582719478250-c89cae4dc85b') },
-                { id: 'case3', name: 'Portfolio Tent', tags: ['Asset Management', 'Operativo'], location: 'TORREMOLINOS · MALLORCA & LLORET', rooms: '920 habitaciones', project: 'Proyecto: 2021-Actualidad', owner: 'Propietario: Inversor Institucional', image: HOTEL('1571896349842-33c89424de2d') },
-                { id: 'case4', name: 'Angsana Real De La Quinta', tags: ['Asset Management', 'Especializado'], location: 'MARBELLA', rooms: '88 habitaciones + 41 Branded Residences', project: 'Proyecto: 2018-Actualidad', owner: 'Propietario: Family Office', image: HOTEL('1564501049412-61c2a3083791') },
-                { id: 'case5', name: 'Rodas', tags: ['Asset Management', 'Operativo'], location: 'GRECIA', rooms: 'Confidencial', project: 'Proyecto: 2025', owner: 'Propietario: Inversor Institucional', image: HOTEL('1455587734955-081b22074882') },
-                { id: 'case6', name: 'Hotel Princesa Plaza', tags: ['Asset Management', 'Operativo y Especializado'], location: 'MADRID', rooms: '409 habitaciones.', project: 'Proyecto: 2018', owner: 'Propietario: Private Equity Fund', image: HOTEL('1542314831-068cd1dbfeeb') },
-            ],
-        },
-        credentials: {
-            id: 'credentials', type: 'placeholder',
-            label: 'Credenciales', title: 'Credenciales',
-            description: 'Sección reservada para casos de éxito adicionales y reconocimientos del equipo.',
-            backgroundColor: '#D4D4D2',
-        },
-        contact: {
-            id: 'contact', type: 'contact',
-            title: 'HABLEMOS', subtitle: 'ASSET MANAGEMENT. HOTELES',
-            backgroundImage: HOTEL('1631049307264-da0ec9d70304'),
-            backgroundColor: '#1a1410',
-            verticalLabel: 'CONTACTO',
-            contacts: [
-                { id: 'contact1', name: 'Juan Garnica Álvarez-Alonso', role: 'Executive Director. Head of Hotels, Savills Iberia', email: 'juan.Garnica@savills.es', phone: '+34 616 44 34 69' },
-                { id: 'contact2', name: 'María Calvo García', role: 'Director Asset Mgmt. & Advisory, Savills Iberia', email: 'maria.calvo@savills.es', phone: '+34 602 23 87 85' },
-            ],
-        },
-    },
-};
-/* ============================================================
-   2. ESTADO + PERSISTENCIA + UTILIDADES
-   ============================================================ */
-function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
-function loadState() {
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw)
-            return null;
-        const p = JSON.parse(raw);
-        if (p && p.sections && p.sectionOrder)
-            return p;
-    }
-    catch (e) { }
-    return null;
-}
-function setByPath(obj, path, value) {
-    const clone = deepClone(obj);
-    let c = clone;
-    for (let i = 0; i < path.length - 1; i++)
-        c = c[path[i]];
-    c[path[path.length - 1]] = value;
-    return clone;
-}
-function getByPath(obj, path) {
-    return path.reduce((a, k) => (a == null ? a : a[k]), obj);
-}
-function avatar(name) {
-    const initials = (name || '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
-    const svg = "<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect width='120' height='120' fill='#1A1E2E'/><text x='50%' y='54%' text-anchor='middle' font-family='Inter,Arial,sans-serif' font-size='42' fill='#ffffff'>" + initials + "</text></svg>";
-    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
-}
-function fileToDataUrl(file) {
-    return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file); });
-}
-/* Contexto global ligero (sin librerías) */
-const SiteCtx = React.createContext(null);
-const useSite = () => React.useContext(SiteCtx);
-function SiteProvider({ children }) {
-    const [data, setData] = useState(() => loadState() || deepClone(INITIAL_DATA));
-    const [saveStatus, setSaveStatus] = useState('saved');
-    // Detección de modo editor vía ?tobalina
-    const [hasAccess, setHasAccess] = useState(false);
-    const [editorVisible, setEditorVisible] = useState(false);
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        let access = false;
-        try {
-            access = localStorage.getItem(ACCESS_KEY) === 'true';
-        }
-        catch (e) { }
-        if (params.has('tobalina')) {
-            access = true;
-            try {
-                localStorage.setItem(ACCESS_KEY, 'true');
-            }
-            catch (e) { }
-        }
-        if (access) {
-            setHasAccess(true);
-            setEditorVisible(true);
-        }
-    }, []);
-    // Persistencia con debounce
-    const timer = useRef(null);
-    useEffect(() => {
-        setSaveStatus('saving');
-        if (timer.current)
-            clearTimeout(timer.current);
-        timer.current = setTimeout(() => {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-                setSaveStatus('saved');
-            }
-            catch (e) {
-                setSaveStatus('error');
-            }
-        }, 400);
-        return () => clearTimeout(timer.current);
-    }, [data]);
-    // Clase global para CSS de edición
-    useEffect(() => {
-        document.body.classList.toggle('edit-mode', hasAccess && editorVisible);
-    }, [hasAccess, editorVisible]);
-    const isEdit = hasAccess && editorVisible;
-    const api = {
-        data, isEdit, hasAccess, editorVisible, saveStatus,
-        setEditorVisible,
-        updateField: (path, value) => setData(d => ({ ...d, sections: setByPath(d.sections, path, value) })),
-        setBg: (sectionId, color) => setData(d => ({ ...d, sections: setByPath(d.sections, [sectionId, 'backgroundColor'], color) })),
-        replaceImage: (path, url) => setData(d => ({ ...d, sections: setByPath(d.sections, path, url) })),
-        reorderSections: (newOrder) => setData(d => ({ ...d, sectionOrder: newOrder })),
-        setArray: (path, arr) => setData(d => ({ ...d, sections: setByPath(d.sections, path, arr) })),
-        addCase: (item) => setData(d => { const arr = [...d.sections.portfolio.cases, item]; return { ...d, sections: setByPath(d.sections, ['portfolio', 'cases'], arr) }; }),
-        removeCase: (idx) => setData(d => { const arr = d.sections.portfolio.cases.filter((_, i) => i !== idx); return { ...d, sections: setByPath(d.sections, ['portfolio', 'cases'], arr) }; }),
-        reset: () => { if (window.confirm('¿Restaurar todo el contenido original? Se perderán los cambios.'))
-            setData(deepClone(INITIAL_DATA)); },
-        exportJSON: () => {
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'savills-content-' + new Date().toISOString().slice(0, 10) + '.json';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(url);
-        },
-    };
-    return React.createElement(SiteCtx.Provider, { value: api }, children);
-}
-/* ============================================================
-   3. COMPONENTES UI BASE
-   ============================================================ */
-function Reveal({ children, delay = 0, className = '', as: Tag = 'div' }) {
-    const ref = useRef(null);
-    useEffect(() => {
-        const el = ref.current;
-        if (!el)
-            return;
-        const io = new IntersectionObserver((entries) => {
-            entries.forEach(e => { if (e.isIntersecting) {
-                el.classList.add('is-visible');
-                io.unobserve(el);
-            } });
-        }, { threshold: 0.15 });
-        io.observe(el);
-        return () => io.disconnect();
-    }, []);
-    return React.createElement(Tag, { ref: ref, className: 'reveal ' + className, style: { transitionDelay: delay + 's' } }, children);
-}
-function Editable({ path, as: Tag = 'span', className = '', children }) {
-    const { isEdit, updateField } = useSite();
-    if (!isEdit)
-        return React.createElement(Tag, { className: className }, children);
-    const onBlur = (e) => updateField(path, e.currentTarget.innerText);
-    const onKey = (e) => { if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        e.currentTarget.blur();
-    } };
-    return (React.createElement(Tag, { className: className + ' tbl-editable', contentEditable: true, suppressContentEditableWarning: true, onBlur: onBlur, onKeyDown: onKey }, children));
-}
-function EditableImage({ path, src, mode = 'img', className = '', children }) {
-    const { isEdit, replaceImage } = useSite();
-    const inputRef = useRef(null);
-    const pick = async (e) => { const f = e.target.files && e.target.files[0]; if (!f)
-        return; const url = await fileToDataUrl(f); replaceImage(path, url); e.target.value = ''; };
-    const trigger = (e) => { e.stopPropagation(); inputRef.current && inputRef.current.click(); };
-    const input = isEdit ? React.createElement("input", { ref: inputRef, type: "file", accept: "image/*", className: "hidden", onChange: pick }) : null;
-    if (mode === 'background') {
-        return (React.createElement("div", { className: 'img-edit-wrap relative ' + className, style: { backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center' } },
-            children,
-            isEdit && React.createElement("button", { onClick: trigger, className: "img-edit-overlay no-print absolute top-3 right-3 z-30 flex items-center gap-1.5 rounded-md bg-black/75 px-3 py-1.5 text-xs font-medium text-white" }, "\uD83D\uDCF7 Cambiar fondo"),
-            input));
-    }
-    return (React.createElement("div", { className: 'img-edit-wrap relative ' + className },
-        React.createElement("img", { src: src, alt: "", className: "h-full w-full object-cover" }),
-        isEdit && React.createElement("button", { onClick: trigger, className: "img-edit-overlay no-print absolute inset-0 z-30 flex items-center justify-center bg-black/45 text-xs font-medium text-white" }, "\uD83D\uDCF7 Cambiar"),
-        input));
-}
-function Donut({ segments, label, size = 140, stroke = 22 }) {
-    const r = (size - stroke) / 2;
-    const C = 2 * Math.PI * r;
-    const total = segments.reduce((s, x) => s + x.value, 0);
-    let cum = 0;
-    const arcs = segments.map(seg => {
-        const frac = seg.value / total;
-        const dash = frac * C, gap = C - dash, offset = C * 0.25 - cum;
-        cum += dash;
-        return { ...seg, dash, gap, offset, frac };
+(function(){
+  const params = new URLSearchParams(location.search);
+  const ON = params.get('edit') === 'Tobalina' || params.has('tobalina');
+  const STORE_KEY = 'savills_overrides_v1';
+  const store = load();
+
+  applyAll();                 // overrides para TODOS (también visitantes)
+  if (!ON) return;            // sin palabra clave → editor invisible
+
+  function load(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {text:{},bg:{},img:{}}; }catch(e){ return {text:{},bg:{},img:{}}; } }
+  function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }
+  function applyAll(){
+    document.querySelectorAll('[data-ek]').forEach(el=>{ const k=el.dataset.ek; if(store.text[k]!=null) el.textContent=store.text[k]; });
+    document.querySelectorAll('[data-bgk]').forEach(el=>{ const k=el.dataset.bgk; if(store.bg[k]) el.style.backgroundColor=store.bg[k]; });
+    document.querySelectorAll('[data-imgk]').forEach(el=>{ const k=el.dataset.imgk; if(store.img[k]) el.src=store.img[k]; });
+  }
+
+  document.body.classList.add('edit-mode');
+  const panel = document.getElementById('tb-panel');
+  panel.style.display='flex';
+  requestAnimationFrame(()=>panel.classList.remove('hidden-panel'));
+  if (window.lucide) lucide.createIcons();
+
+  let selected = null;
+
+  document.querySelectorAll('[data-ek]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault(); selectText(el);}));
+  document.querySelectorAll('[data-imgk]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault(); e.stopPropagation(); selectImg(el);}));
+  document.querySelectorAll('[data-bgk]').forEach(el=>el.addEventListener('click',e=>{ if(e.target===el) selectBg(el); }));
+
+  function clearSel(){
+    document.querySelectorAll('.tb-selected').forEach(n=>n.classList.remove('tb-selected'));
+    document.querySelectorAll('[contenteditable]').forEach(n=>n.removeAttribute('contenteditable'));
+    document.getElementById('tb-sel-empty').classList.remove('hidden');
+    document.getElementById('tb-sel-text').classList.add('hidden');
+    document.getElementById('tb-sel-img').classList.add('hidden');
+    selected=null;
+  }
+  function selectText(el){
+    clearSel(); el.classList.add('tb-selected');
+    el.setAttribute('contenteditable','true'); el.focus();
+    selected={type:'text', el, key:el.dataset.ek};
+    document.getElementById('tb-sel-empty').classList.add('hidden');
+    document.getElementById('tb-sel-text').classList.remove('hidden');
+    document.getElementById('tb-text-input').value = el.textContent.trim();
+    el.oninput=()=>{ store.text[el.dataset.ek]=el.textContent; document.getElementById('tb-text-input').value=el.textContent; save(); };
+  }
+  function selectImg(el){
+    clearSel(); el.classList.add('tb-selected');
+    selected={type:'img', el, key:el.dataset.imgk};
+    document.getElementById('tb-sel-empty').classList.add('hidden');
+    document.getElementById('tb-sel-img').classList.remove('hidden');
+    document.getElementById('tb-img-preview').src=el.src; switchTab('img');
+  }
+  function selectBg(el){
+    clearSel(); el.classList.add('tb-selected');
+    selected={type:'bg', el, key:el.dataset.bgk};
+    document.getElementById('tb-sel-empty').textContent='Sección "'+el.dataset.bgk+'" — cambia su color en la pestaña Diseño.';
+    switchTab('design');
+    const sw=document.querySelector('[data-bgswatch="'+el.dataset.bgk+'"]'); if(sw) sw.focus();
+  }
+
+  document.getElementById('tb-text-input').addEventListener('input',e=>{
+    if(selected && selected.type==='text'){ selected.el.textContent=e.target.value; store.text[selected.key]=e.target.value; save(); }
+  });
+  document.getElementById('tb-img-replace').addEventListener('click',()=>document.getElementById('tb-img-file').click());
+  document.getElementById('tb-img-file').addEventListener('change',e=>{
+    const f=e.target.files[0]; if(!f||!selected||selected.type!=='img') return;
+    const r=new FileReader();
+    r.onload=ev=>{ selected.el.src=ev.target.result; document.getElementById('tb-img-preview').src=ev.target.result; store.img[selected.key]=ev.target.result; save(); buildImgGrid(); };
+    r.readAsDataURL(f);
+  });
+
+  function switchTab(name){
+    document.querySelectorAll('.tb-tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
+    document.querySelectorAll('.tb-pane').forEach(p=>p.classList.toggle('hidden', p.dataset.pane!==name));
+  }
+  document.querySelectorAll('.tb-tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
+
+  function rgbToHex(rgb){ const m=(rgb||'').match(/\d+/g); if(!m) return '#000000'; return '#'+m.slice(0,3).map(x=>(+x).toString(16).padStart(2,'0')).join(''); }
+
+  function buildBgList(){
+    const wrap=document.getElementById('tb-bg-list'); wrap.innerHTML='';
+    document.querySelectorAll('[data-bgk]').forEach(el=>{
+      const k=el.dataset.bgk;
+      const cur=store.bg[k]||rgbToHex(getComputedStyle(el).backgroundColor);
+      const row=document.createElement('div'); row.className='flex items-center justify-between gap-2';
+      row.innerHTML='<span class="text-xs text-[#bbb] capitalize">'+k.replace('-',' ')+'</span>';
+      const inp=document.createElement('input'); inp.type='color'; inp.className='tb-swatch'; inp.value=cur; inp.setAttribute('data-bgswatch',k);
+      inp.addEventListener('input',()=>{ el.style.backgroundColor=inp.value; store.bg[k]=inp.value; save(); });
+      row.appendChild(inp); wrap.appendChild(row);
     });
-    return (React.createElement("div", { className: "flex flex-col items-center" },
-        React.createElement("div", { className: "relative", style: { width: size, height: size } },
-            React.createElement("svg", { width: size, height: size, viewBox: `0 0 ${size} ${size}` }, arcs.map((a, i) => (React.createElement("circle", { key: i, className: "donut-arc", cx: size / 2, cy: size / 2, r: r, fill: "none", stroke: a.color, strokeWidth: stroke, strokeDasharray: `${a.dash} ${a.gap}`, strokeDashoffset: a.offset, style: { animationDelay: (i * 0.12) + 's' } })))),
-            React.createElement("div", { className: "absolute inset-0 flex items-center justify-center px-3 text-center" },
-                React.createElement("span", { className: "font-serif text-[13px] leading-tight text-savills-navy" }, label)),
-            arcs.map((a, i) => {
-                if (a.frac < 0.06)
-                    return null;
-                const mid = (arcs.slice(0, i).reduce((s, x) => s + x.frac, 0) + a.frac / 2);
-                const ang = mid * 2 * Math.PI - Math.PI / 2;
-                const lr = r + 2;
-                const x = size / 2 + lr * Math.cos(ang), y = size / 2 + lr * Math.sin(ang);
-                const col = a.color === '#1A1E2E' ? '#fff' : '#1A1E2E';
-                return React.createElement("span", { key: 'p' + i, className: "absolute text-[10px] font-bold", style: { left: x, top: y, transform: 'translate(-50%,-50%)', color: col } },
-                    a.value,
-                    "%");
-            })),
-        React.createElement("div", { className: "mt-3 space-y-1 text-left" }, segments.map((s, i) => (React.createElement("div", { key: i, className: "flex items-center gap-1.5 text-[11px] text-savills-navy/80" },
-            React.createElement("span", { className: "inline-block h-2.5 w-2.5 shrink-0", style: { backgroundColor: s.color, border: s.color === '#FFFFFF' ? '1px solid #1A1E2E' : 'none' } }),
-            s.name))))));
-}
-/* ============================================================
-   4. NAVBAR
-   ============================================================ */
-function Navbar({ active, onNav, dark }) {
-    const { data } = useSite();
-    const tc = dark ? 'text-white' : 'text-savills-navy';
-    return (React.createElement("header", { className: 'nav-drop no-print fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-5 py-4 sm:px-8 lg:px-10 ' + (dark ? 'bg-transparent' : 'bg-savills-gray/90 backdrop-blur-sm') },
-        React.createElement("div", { className: "bg-savills-yellow px-2 py-1" },
-            React.createElement("span", { className: "text-[10px] font-bold uppercase tracking-widest2 text-savills-navy sm:text-xs" }, data.meta.clientName)),
-        React.createElement("nav", { className: "hidden items-center gap-7 lg:flex" }, data.nav.items.map(it => (React.createElement("button", { key: it.id, onClick: () => onNav(it.id), className: 'text-[13px] font-medium tracking-wide transition-colors ' + (active === it.id ? tc + ' border-b border-current' : (dark ? 'text-white/70 hover:text-white' : 'text-savills-navy/70 hover:text-savills-navy')) }, it.label)))),
-        React.createElement("div", { className: 'text-[11px] font-medium uppercase tracking-widest2 ' + tc }, data.meta.deckLabel)));
-}
-/* ============================================================
-   5. SECCIONES
-   ============================================================ */
-function Cover({ d, id }) {
-    return (React.createElement("section", { id: id, className: "relative flex h-screen w-full items-end overflow-hidden" },
-        React.createElement(EditableImage, { path: [id, 'backgroundImage'], src: d.backgroundImage, mode: "background", className: "absolute inset-0 h-full w-full" },
-            React.createElement("div", { className: "absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/50" })),
-        React.createElement("div", { className: "cover-up relative z-10 w-full px-5 pb-16 pt-32 sm:px-10 sm:pb-24 lg:px-16" },
-            React.createElement(Editable, { path: [id, 'title'], as: "h1", className: "font-serif text-[13vw] leading-[0.9] text-white sm:text-[9vw] lg:text-[7vw]" }, d.title),
-            React.createElement(Editable, { path: [id, 'subtitle'], as: "p", className: "mt-3 text-xs font-medium uppercase tracking-widest2 text-white/90 sm:text-sm" }, d.subtitle)),
-        React.createElement("div", { className: "badge-pop absolute bottom-6 right-6 z-10 bg-savills-yellow px-5 py-4 sm:bottom-10 sm:right-10" },
-            React.createElement("span", { className: "font-serif text-xl italic text-savills-red sm:text-2xl" }, "savills"))));
-}
-function WorldMap({ markers, id }) {
-    return (React.createElement("div", { className: "relative w-full max-w-xl" },
-        React.createElement("svg", { viewBox: "0 0 1000 500", className: "w-full opacity-20" },
-            React.createElement("path", { d: "M60 180 L140 150 L220 170 L260 220 L240 280 L180 300 L120 270 L70 230 Z", fill: "#3A3F52" }),
-            React.createElement("path", { d: "M430 120 L520 100 L600 130 L640 200 L610 260 L540 280 L470 250 L420 190 Z", fill: "#3A3F52" }),
-            React.createElement("path", { d: "M700 160 L800 140 L880 180 L900 250 L850 310 L770 300 L720 240 Z", fill: "#3A3F52" })),
-        markers.map((m, i) => (React.createElement("div", { key: m.id, className: "absolute flex flex-col items-center text-center", style: { left: m.x + '%', top: m.y + '%', transform: 'translate(-50%,-50%)' } },
-            React.createElement(Editable, { path: [id, 'mapMarkers', i, 'value'], as: "div", className: "font-serif text-2xl text-white sm:text-3xl" }, m.value),
-            React.createElement("div", { className: "text-[10px] uppercase tracking-wide text-white/60" }, m.label),
-            React.createElement("div", { className: "text-[10px] font-bold uppercase tracking-widest2 text-white" }, m.region),
-            React.createElement("span", { className: "mt-1 h-2 w-2 rounded-full bg-savills-yellow", style: { boxShadow: '0 0 8px 2px rgba(255,213,0,.6)' } }))))));
-}
-function GlobalPresence({ d, id }) {
-    return (React.createElement("section", { id: id, className: "relative min-h-screen w-full px-5 py-28 text-white sm:px-10 lg:px-16", style: { background: d.backgroundColor } },
-        React.createElement(Reveal, null,
-            React.createElement("h2", { className: "font-serif text-3xl leading-tight sm:text-4xl lg:text-5xl" },
-                React.createElement(Editable, { path: [id, 'title'], as: "span" }, d.title),
-                ' ',
-                React.createElement(Editable, { path: [id, 'titleItalic'], as: "span", className: "italic" }, d.titleItalic)),
-            React.createElement(Editable, { path: [id, 'description'], as: "p", className: "mt-4 max-w-2xl text-sm text-white/70 sm:text-base" }, d.description)),
-        React.createElement("div", { className: "mt-16 grid grid-cols-1 gap-12 lg:grid-cols-[1fr_2fr_1fr] lg:gap-8" },
-            React.createElement(Reveal, { delay: 0.1, className: "space-y-7" },
-                React.createElement("h3", { className: "font-serif text-xl" },
-                    d.stats.left.heading,
-                    " ",
-                    React.createElement("span", { className: "italic" }, d.stats.left.headingItalic)),
-                d.stats.left.items.map((it, i) => (React.createElement("div", { key: it.id },
-                    React.createElement(Editable, { path: [id, 'stats', 'left', 'items', i, 'value'], as: "div", className: "font-serif text-3xl text-savills-yellow sm:text-4xl" }, it.value),
-                    React.createElement(Editable, { path: [id, 'stats', 'left', 'items', i, 'label'], as: "div", className: "text-xs text-white/60" }, it.label))))),
-            React.createElement(Reveal, { delay: 0.2, className: "flex items-center justify-center py-6" },
-                React.createElement(WorldMap, { markers: d.mapMarkers, id: id })),
-            React.createElement(Reveal, { delay: 0.3, className: "space-y-6" },
-                React.createElement("h3", { className: "font-serif text-xl" }, d.stats.right.heading),
-                d.stats.right.items.map((it, i) => (React.createElement("div", { key: it.id },
-                    React.createElement(Editable, { path: [id, 'stats', 'right', 'items', i, 'value'], as: "div", className: "font-serif text-3xl sm:text-4xl" }, it.value),
-                    React.createElement(Editable, { path: [id, 'stats', 'right', 'items', i, 'label'], as: "div", className: "text-xs text-white/60" }, it.label))))))));
-}
-function PersonRow({ person, basePath, idx, photoSize = 'h-11 w-11' }) {
-    return (React.createElement("div", { className: "flex items-center gap-3 py-2" },
-        React.createElement(EditableImage, { path: [...basePath, idx, 'photo'], src: person.photo || avatar(person.name), mode: "img", className: photoSize + ' shrink-0 overflow-hidden rounded-sm bg-savills-navy/10' }),
-        React.createElement("div", { className: "min-w-0" },
-            React.createElement(Editable, { path: [...basePath, idx, 'name'], as: "div", className: "truncate text-[13px] font-semibold text-savills-navy" }, person.name),
-            React.createElement(Editable, { path: [...basePath, idx, 'role'], as: "div", className: "text-[11px] leading-tight text-savills-navy/60" }, person.role))));
-}
-function TeamEmea({ d, id }) {
-    return (React.createElement("section", { id: id, className: "relative min-h-screen w-full px-5 py-28 sm:px-10 lg:px-16", style: { background: d.backgroundColor } },
-        React.createElement(Reveal, null,
-            React.createElement("h2", { className: "text-center font-serif text-3xl text-savills-navy sm:text-4xl" }, d.title),
-            React.createElement(Editable, { path: [id, 'description'], as: "p", className: "mx-auto mt-4 max-w-2xl text-center text-sm text-savills-navy/60" }, d.description)),
-        React.createElement("div", { className: "mt-14 grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_1.4fr_1.1fr]" },
-            React.createElement(Reveal, { delay: 0.1, className: "bg-savills-navy p-6 text-white" },
-                React.createElement("h3", { className: "mb-4 text-xs font-bold uppercase tracking-widest2 text-savills-yellow" }, d.iberiaBlock.heading),
-                React.createElement("div", { className: "divide-y divide-white/10" }, d.iberiaBlock.people.map((p, i) => (React.createElement(PersonRow, { key: p.id, person: p, idx: i, basePath: [id, 'iberiaBlock', 'people'] })))),
-                React.createElement("div", { className: "mt-5 border-t border-white/10 pt-4" },
-                    React.createElement("div", { className: "text-xs font-bold uppercase tracking-widest2" }, d.iberiaBlock.statsLabel),
-                    React.createElement("div", { className: "mt-3 grid grid-cols-2 gap-2" }, d.iberiaBlock.stats.map(s => (React.createElement("div", { key: s.id, className: "text-[11px] text-white/70" },
-                        React.createElement("span", { className: "font-serif text-base text-white" }, s.value),
-                        " ",
-                        s.label)))))),
-            React.createElement(Reveal, { delay: 0.2, className: "bg-white p-6" }, d.regionColumns.map((col, ci) => (React.createElement("div", { key: col.id, className: "mb-6 last:mb-0" },
-                React.createElement("h4", { className: "mb-2 text-[10px] font-bold uppercase tracking-widest2 text-savills-navy/50" }, col.regionLabel),
-                React.createElement("div", { className: "divide-y divide-savills-navy/10" }, col.people.map((p, i) => (React.createElement(PersonRow, { key: p.id, person: p, idx: i, basePath: [id, 'regionColumns', ci, 'people'] })))))))),
-            React.createElement(Reveal, { delay: 0.3, className: "bg-white p-6" },
-                React.createElement("div", { className: "divide-y divide-savills-navy/10" }, d.countryColumn.map((p, i) => (React.createElement("div", { key: p.id, className: "flex items-center justify-between gap-2 py-1" },
-                    React.createElement(PersonRow, { person: p, idx: i, basePath: [id, 'countryColumn'], photoSize: "h-10 w-10" }),
-                    React.createElement("span", { className: "shrink-0 text-[9px] font-bold uppercase tracking-wide text-savills-navy/40", style: { writingMode: 'vertical-rl' } }, p.country)))))))));
-}
-function ServicesMatrix({ d, id }) {
-    return (React.createElement("section", { id: id, className: "relative min-h-screen w-full px-5 py-28 sm:px-10 lg:px-16", style: { background: d.backgroundColor } },
-        React.createElement(Reveal, { className: "text-center" },
-            React.createElement("h2", { className: "font-serif text-3xl text-savills-navy sm:text-4xl" },
-                React.createElement(Editable, { path: [id, 'title'], as: "span" }, d.title),
-                ' ',
-                React.createElement(Editable, { path: [id, 'titleItalic'], as: "span", className: "italic" }, d.titleItalic),
-                ' ',
-                React.createElement(Editable, { path: [id, 'titleSuffix'], as: "span" }, d.titleSuffix)),
-            React.createElement(Editable, { path: [id, 'description'], as: "p", className: "mx-auto mt-4 max-w-3xl text-sm text-savills-navy/60" }, d.description),
-            React.createElement("span", { className: "mt-5 inline-block bg-savills-navy px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest2 text-white" }, d.badge)),
-        React.createElement(Reveal, { delay: 0.15, className: "mt-12 overflow-x-auto scrollbar-dark" },
-            React.createElement("div", { className: "min-w-[820px]" },
-                React.createElement("div", { className: "grid border-b-2 border-savills-navy/20 pb-4", style: { gridTemplateColumns: `160px repeat(${d.phases.length}, 1fr)` } },
-                    React.createElement("div", null),
-                    d.phases.map((ph, pi) => (React.createElement("div", { key: ph.id, className: "flex items-center justify-center gap-2 px-2" },
-                        React.createElement("span", { className: "flex h-5 w-5 items-center justify-center bg-savills-navy text-[10px] font-bold text-white" }, ph.number),
-                        React.createElement(Editable, { path: [id, 'phases', pi, 'label'], as: "span", className: "text-center text-sm text-savills-navy" }, ph.label))))),
-                d.rows.map((row, ri) => (React.createElement("div", { key: row.id, className: 'grid border-b border-savills-navy/10 ' + (row.highlight ? 'bg-white/60' : ''), style: { gridTemplateColumns: `160px repeat(${d.phases.length}, 1fr)` } },
-                    React.createElement(Editable, { path: [id, 'rows', ri, 'label'], as: "div", className: "flex items-center py-4 pr-3 text-sm font-semibold text-savills-navy" }, row.label),
-                    row.cells.map((cell, ci) => (React.createElement("div", { key: ci, className: "flex flex-col gap-1.5 border-l border-savills-navy/10 px-3 py-4" }, cell.map((t, ti) => (React.createElement(Editable, { key: ti, path: [id, 'rows', ri, 'cells', ci, ti], as: "div", className: "text-center text-[11px] leading-snug text-savills-navy/75" }, t))))))))),
-                React.createElement(Editable, { path: [id, 'footerBar'], as: "div", className: "mt-4 bg-savills-navy py-2.5 text-center text-[11px] font-bold uppercase tracking-widest2 text-white" }, d.footerBar)))));
-}
-function Placeholder({ d, id }) {
-    return (React.createElement("section", { id: id, className: "relative flex min-h-[60vh] w-full flex-col items-center justify-center px-5 py-24 text-center sm:px-10", style: { background: d.backgroundColor } },
-        React.createElement(Reveal, null,
-            React.createElement(Editable, { path: [id, 'title'], as: "h2", className: "font-serif text-3xl text-savills-navy sm:text-4xl" }, d.title),
-            React.createElement(Editable, { path: [id, 'description'], as: "p", className: "mx-auto mt-4 max-w-xl text-sm text-savills-navy/60" }, d.description))));
-}
-/* ============================================================
-   6. CARTERA (galería editable + drag & drop con reflujo)
-   ============================================================ */
-function popAnim(el) {
-    if (!el || !el.animate)
-        return;
-    try {
-        el.animate([{ transform: 'translateY(8px) scale(.98)', opacity: .6 }, { transform: 'none', opacity: 1 }], { duration: 380, easing: 'cubic-bezier(.22,1,.36,1)' });
-    }
-    catch (e) { }
-}
-function CaseCard({ c, idx, dnd }) {
-    const { isEdit, removeCase } = useSite();
-    return (React.createElement("div", { className: 'case-card group relative h-72 overflow-hidden bg-savills-navy ' + (isEdit ? 'cursor-grab' : ''), draggable: isEdit, onDragStart: (e) => dnd.onDragStart(e, idx), onDragOver: (e) => dnd.onDragOver(e, idx), onDragEnd: dnd.onDragEnd, onDrop: (e) => dnd.onDrop(e, idx), "data-dndidx": idx },
-        React.createElement(EditableImage, { path: ['portfolio', 'cases', idx, 'image'], src: c.image, mode: "background", className: "case-img absolute inset-0 h-full w-full" },
-            React.createElement("div", { className: "absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/40" })),
-        isEdit && (React.createElement("button", { onClick: () => removeCase(idx), className: "no-print absolute top-3 left-3 z-30 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-white opacity-0 transition group-hover:opacity-100", title: "Eliminar" }, "\u2715")),
-        React.createElement("div", { className: "relative z-10 flex h-full flex-col justify-between p-5" },
-            React.createElement("div", null,
-                React.createElement(Editable, { path: ['portfolio', 'cases', idx, 'name'], as: "h3", className: "font-serif text-xl italic text-white" }, c.name),
-                React.createElement("div", { className: "mt-1 space-y-0.5" }, c.tags.map((t, ti) => (React.createElement(Editable, { key: ti, path: ['portfolio', 'cases', idx, 'tags', ti], as: "div", className: "text-[11px] uppercase tracking-wide text-white/70" }, t))))),
-            React.createElement("div", { className: "space-y-0.5" },
-                React.createElement(Editable, { path: ['portfolio', 'cases', idx, 'location'], as: "div", className: "text-xs font-bold uppercase tracking-widest2 text-white" }, c.location),
-                React.createElement(Editable, { path: ['portfolio', 'cases', idx, 'rooms'], as: "div", className: "text-[11px] text-white/80" }, c.rooms),
-                React.createElement(Editable, { path: ['portfolio', 'cases', idx, 'project'], as: "div", className: "text-[11px] text-white/60" }, c.project),
-                React.createElement(Editable, { path: ['portfolio', 'cases', idx, 'owner'], as: "div", className: "text-[11px] text-white/60" }, c.owner)))));
-}
-function useCardDnd() {
-    const { data, setArray } = useSite();
-    const dragIdx = useRef(null);
-    const onDragStart = (e, idx) => { dragIdx.current = idx; e.currentTarget.classList.add('dragging'); };
-    const onDragOver = (e, idx) => { e.preventDefault(); };
-    const onDragEnd = (e) => { e.currentTarget.classList.remove('dragging'); document.querySelectorAll('.drag-over').forEach(n => n.classList.remove('drag-over')); };
-    const onDrop = (e, idx) => {
-        e.preventDefault();
-        const from = dragIdx.current;
-        if (from == null || from === idx)
-            return;
-        const arr = [...data.sections.portfolio.cases];
-        const [moved] = arr.splice(from, 1);
-        arr.splice(idx, 0, moved);
-        setArray(['portfolio', 'cases'], arr);
-        dragIdx.current = null;
-        requestAnimationFrame(() => {
-            const node = document.querySelector(`[data-dndidx='${idx}']`);
-            popAnim(node);
-        });
-    };
-    return { onDragStart, onDragOver, onDragEnd, onDrop };
-}
-function AddCase() {
-    const { addCase } = useSite();
-    const onPick = async (e) => {
-        const f = e.target.files && e.target.files[0];
-        let image = "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?q=80&w=1200&auto=format&fit=crop";
-        if (f)
-            image = await fileToDataUrl(f);
-        addCase({ id: 'case_' + Date.now(), name: 'Nuevo Hotel', tags: ['Asset Management'], location: 'UBICACIÓN', rooms: '0 habitaciones', project: 'Proyecto: 2026', owner: 'Propietario: —', image });
-        e.target.value = '';
-    };
-    return (React.createElement("label", { className: "no-print flex h-72 cursor-pointer flex-col items-center justify-center gap-2 border-2 border-dashed border-savills-navy/25 text-savills-navy/50 transition hover:border-savills-navy/50 hover:text-savills-navy/80" },
-        React.createElement("span", { className: "text-3xl leading-none" }, "+"),
-        React.createElement("span", { className: "text-xs font-medium" }, "A\u00F1adir caso"),
-        React.createElement("input", { type: "file", accept: "image/*", className: "hidden", onChange: onPick })));
-}
-function PortfolioGrid({ d, id }) {
-    const { isEdit } = useSite();
-    const dnd = useCardDnd();
-    return (React.createElement("section", { id: id, className: "relative min-h-screen w-full px-5 py-28 sm:px-10 lg:px-16", style: { background: d.backgroundColor } },
-        React.createElement(Reveal, { className: "text-center" },
-            React.createElement(Editable, { path: [id, 'statsHeader', 'title'], as: "h2", className: "font-serif text-3xl text-savills-navy sm:text-4xl" }, d.statsHeader.title),
-            React.createElement(Editable, { path: [id, 'statsHeader', 'subtitleItalic'], as: "p", className: "mt-1 font-serif text-xl italic text-savills-navy sm:text-2xl" }, d.statsHeader.subtitleItalic),
-            React.createElement(Editable, { path: [id, 'statsHeader', 'description'], as: "p", className: "mx-auto mt-3 max-w-2xl text-sm text-savills-navy/60" }, d.statsHeader.description)),
-        React.createElement(Reveal, { delay: 0.15, className: "mt-14 grid grid-cols-2 gap-8 sm:grid-cols-4" }, d.donuts.map(dn => (React.createElement(Donut, { key: dn.id, segments: dn.segments, label: dn.label, size: 140, stroke: 22 })))),
-        React.createElement(Reveal, { delay: 0.2, className: "mt-16 grid grid-cols-1 gap-8 bg-white p-6 sm:p-8 lg:grid-cols-[80px_1fr_1.4fr]" },
-            React.createElement("div", { className: "hidden items-center justify-center lg:flex" },
-                React.createElement("span", { className: "text-xs font-bold uppercase tracking-widest2 text-savills-navy/50", style: { writingMode: 'vertical-rl' } }, d.teamStrip.verticalLabel)),
-            React.createElement("div", { className: "grid grid-cols-3 gap-4" }, d.teamStrip.people.map((p, i) => (React.createElement("div", { key: p.id },
-                React.createElement(EditableImage, { path: ['portfolio', 'teamStrip', 'people', i, 'photo'], src: p.photo || avatar(p.name), mode: "img", className: "aspect-square w-full overflow-hidden border-l-2 border-savills-yellow" }),
-                React.createElement(Editable, { path: ['portfolio', 'teamStrip', 'people', i, 'name'], as: "div", className: "mt-2 text-xs font-semibold text-savills-navy" }, p.name),
-                React.createElement(Editable, { path: ['portfolio', 'teamStrip', 'people', i, 'role'], as: "div", className: "text-[11px] text-savills-navy/50" }, p.role))))),
-            React.createElement("ul", { className: "space-y-2.5" }, d.teamStrip.bullets.map((b, i) => (React.createElement("li", { key: i, className: "flex gap-2 text-[13px] text-savills-navy/80" },
-                React.createElement("span", { className: "mt-0.5 shrink-0 text-savills-yellow" }, "\u276F"),
-                React.createElement(Editable, { path: ['portfolio', 'teamStrip', 'bullets', i], as: "span" }, b)))))),
-        React.createElement(Reveal, { delay: 0.25, className: "mt-16" },
-            React.createElement("div", { className: "grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3" },
-                d.cases.map((c, i) => (React.createElement(CaseCard, { key: c.id, c: c, idx: i, dnd: dnd }))),
-                isEdit && React.createElement(AddCase, null)),
-            isEdit && React.createElement("p", { className: "no-print mt-4 text-center text-[11px] text-savills-navy/40" }, "Arrastra las tarjetas para reordenarlas \u00B7 pasa el cursor para cambiar imagen o eliminar"))));
-}
-/* ============================================================
-   7. CONTACTO (formulario con microinteracciones)
-   ============================================================ */
-function ContactForm() {
-    const [form, setForm] = useState({ name: '', email: '', message: '' });
-    const [sent, setSent] = useState(false);
-    const submit = () => {
-        if (!form.name || !form.email || !form.message)
-            return;
-        setSent(true);
-        setTimeout(() => setSent(false), 4000);
-        setForm({ name: '', email: '', message: '' });
-    };
-    const field = (k, ph, type = 'text') => (React.createElement("input", { type: type, value: form[k], placeholder: ph, onChange: e => setForm({ ...form, [k]: e.target.value }), className: "w-full border-b border-white/30 bg-transparent py-3 text-sm text-white placeholder-white/40 outline-none transition-all focus:border-savills-yellow focus:scale-[1.01]" }));
-    return (React.createElement("div", { className: "space-y-4" },
-        field('name', 'Nombre completo'),
-        field('email', 'Email corporativo', 'email'),
-        React.createElement("textarea", { rows: "3", value: form.message, placeholder: "\u00BFEn qu\u00E9 podemos ayudarte?", onChange: e => setForm({ ...form, message: e.target.value }), className: "w-full resize-none border-b border-white/30 bg-transparent py-3 text-sm text-white placeholder-white/40 outline-none transition-all focus:border-savills-yellow focus:scale-[1.01]" }),
-        React.createElement("button", { onClick: submit, className: "mt-4 flex items-center gap-2 bg-savills-yellow px-6 py-3 text-sm font-bold uppercase tracking-wide text-savills-navy transition-all hover:translate-x-1 hover:bg-white active:scale-95" }, sent ? '✓ Mensaje enviado' : 'Enviar mensaje →')));
-}
-function Contact({ d, id }) {
-    return (React.createElement("section", { id: id, className: "relative w-full overflow-hidden text-white", style: { background: d.backgroundColor } },
-        React.createElement(EditableImage, { path: [id, 'backgroundImage'], src: d.backgroundImage, mode: "background", className: "absolute inset-0 h-full w-full opacity-40" }),
-        React.createElement("div", { className: "absolute inset-0", style: { background: 'linear-gradient(to bottom, rgba(26,20,16,.7), rgba(26,20,16,.85), rgba(26,20,16,1))' } }),
-        React.createElement("div", { className: "relative z-10 px-5 py-28 sm:px-10 lg:px-16" },
-            React.createElement(Reveal, null,
-                React.createElement(Editable, { path: [id, 'title'], as: "h2", className: "font-serif text-[16vw] leading-[0.9] sm:text-[11vw] lg:text-[8vw]" }, d.title),
-                React.createElement(Editable, { path: [id, 'subtitle'], as: "p", className: "mt-2 text-xs font-medium uppercase tracking-widest2 text-white/70 sm:text-sm" }, d.subtitle)),
-            React.createElement("div", { className: "mt-16 grid grid-cols-1 gap-12 lg:grid-cols-2" },
-                React.createElement(Reveal, { delay: 0.15 },
-                    React.createElement("span", { className: "mb-6 inline-block text-xs font-bold uppercase tracking-widest2 text-white/50" }, d.verticalLabel),
-                    React.createElement("div", { className: "space-y-8" }, d.contacts.map((c, i) => (React.createElement("div", { key: c.id, className: "border-l-2 border-savills-yellow pl-4" },
-                        React.createElement(Editable, { path: [id, 'contacts', i, 'name'], as: "div", className: "text-sm font-semibold text-white" }, c.name),
-                        React.createElement(Editable, { path: [id, 'contacts', i, 'role'], as: "div", className: "text-xs text-white/60" }, c.role),
-                        React.createElement("div", { className: "mt-2 flex flex-wrap gap-4 text-xs text-white/80" },
-                            React.createElement("a", { href: 'mailto:' + c.email, className: "hover:text-savills-yellow" },
-                                React.createElement(Editable, { path: [id, 'contacts', i, 'email'], as: "span" }, c.email)),
-                            React.createElement("a", { href: 'tel:' + c.phone, className: "hover:text-savills-yellow" },
-                                React.createElement(Editable, { path: [id, 'contacts', i, 'phone'], as: "span" }, c.phone)))))))),
-                React.createElement(Reveal, { delay: 0.25 },
-                    React.createElement(ContactForm, null))),
-            React.createElement("div", { className: "mt-20 flex items-center justify-between border-t border-white/10 pt-6" },
-                React.createElement("span", { className: "text-[11px] text-white/40" },
-                    "\u00A9 ",
-                    new Date().getFullYear(),
-                    " Savills"),
-                React.createElement("span", { className: "bg-savills-yellow px-3 py-1 font-serif text-sm italic text-savills-red" }, "savills")))));
-}
-/* Mapa tipo -> componente */
-const SECTION_COMPONENTS = {
-    'cover': Cover,
-    'global-presence': GlobalPresence,
-    'team-emea': TeamEmea,
-    'services-matrix': ServicesMatrix,
-    'portfolio-grid': PortfolioGrid,
-    'contact': Contact,
-    'placeholder': Placeholder,
-};
-function SectionRenderer({ sectionId }) {
-    const { data } = useSite();
-    const sd = data.sections[sectionId];
-    if (!sd)
-        return null;
-    const Comp = SECTION_COMPONENTS[sd.type];
-    return Comp ? React.createElement(Comp, { d: sd, id: sectionId }) : null;
-}
-/* ============================================================
-   8. EDITOR
-   ============================================================ */
-const TYPE_LABELS = {
-    'cover': 'Portada', 'global-presence': 'Presencia Global', 'team-emea': 'Equipo',
-    'services-matrix': 'Servicios', 'portfolio-grid': 'Cartera', 'contact': 'Contacto', 'placeholder': 'Sección genérica',
-};
-const PRESET_COLORS = ['#D4D4D2', '#1A1E2E', '#FFD500', '#FFFFFF', '#1a1410', '#B8B8B6'];
-function EditorTopBar({ panelOpen, setPanelOpen }) {
-    const { setEditorVisible, saveStatus, exportJSON, reset } = useSite();
-    return (React.createElement("div", { className: "no-print fixed top-0 left-0 right-0 z-50 flex h-12 items-center justify-between bg-[#18181b] px-4 text-white shadow-lg" },
-        React.createElement("div", { className: "flex items-center gap-3" },
-            React.createElement("span", { className: "rounded bg-savills-yellow px-2 py-0.5 text-[10px] font-bold text-savills-navy" }, "MODO EDITOR"),
-            React.createElement("span", { className: "text-[11px] text-white/50" }, saveStatus === 'saving' ? 'Guardando…' : saveStatus === 'error' ? '⚠ Sin persistencia (usa Exportar)' : '✓ Guardado en este navegador')),
-        React.createElement("div", { className: "flex items-center gap-2" },
-            React.createElement("button", { onClick: () => setPanelOpen(!panelOpen), className: "rounded-md px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/10" }, "Panel"),
-            React.createElement("button", { onClick: reset, className: "rounded-md px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/10" }, "Restaurar original"),
-            React.createElement("button", { onClick: exportJSON, className: "rounded-md bg-savills-yellow px-3 py-1.5 text-xs font-bold text-savills-navy transition hover:bg-white" }, "Exportar JSON"),
-            React.createElement("button", { onClick: () => setEditorVisible(false), className: "rounded-md border border-white/20 px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/10" }, "Ver como p\u00FAblico"))));
-}
-function LayersTab() {
-    const { data, reorderSections } = useSite();
-    const dragIdx = useRef(null);
-    const move = (from, to) => {
-        if (to < 0 || to >= data.sectionOrder.length)
-            return;
-        const arr = [...data.sectionOrder];
-        const [m] = arr.splice(from, 1);
-        arr.splice(to, 0, m);
-        reorderSections(arr);
-        requestAnimationFrame(() => { const n = document.querySelector(`[data-layeridx='${to}']`); popAnim(n); });
-    };
-    const scrollTo = (id) => document.getElementById(id) && document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-    return (React.createElement("div", { className: "flex h-full flex-col" },
-        React.createElement("div", { className: "px-4 py-3" },
-            React.createElement("h3", { className: "text-xs font-bold uppercase tracking-wide text-white/70" }, "Secciones"),
-            React.createElement("p", { className: "mt-1 text-[11px] text-white/40" }, "Arrastra o usa \u2191\u2193 para reordenar. El sitio se reacomoda al instante.")),
-        React.createElement("div", { className: "flex-1 space-y-1.5 overflow-y-auto px-3 pb-4 scrollbar-dark" }, data.sectionOrder.map((sid, i) => {
-            const s = data.sections[sid];
-            if (!s)
-                return null;
-            return (React.createElement("div", { key: sid, "data-layeridx": i, draggable: true, onDragStart: (e) => { dragIdx.current = i; e.currentTarget.classList.add('dragging'); }, onDragOver: (e) => { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }, onDragLeave: (e) => e.currentTarget.classList.remove('drag-over'), onDragEnd: (e) => { e.currentTarget.classList.remove('dragging'); document.querySelectorAll('.drag-over').forEach(n => n.classList.remove('drag-over')); }, onDrop: (e) => { e.preventDefault(); e.currentTarget.classList.remove('drag-over'); if (dragIdx.current != null && dragIdx.current !== i)
-                    move(dragIdx.current, i); dragIdx.current = null; }, className: "group flex items-center gap-2 rounded-md bg-white/5 px-2.5 py-2.5 text-white/90 transition hover:bg-white/10" },
-                React.createElement("span", { className: "cursor-grab select-none text-white/30 active:cursor-grabbing" }, "\u283F"),
-                React.createElement("div", { className: "min-w-0 flex-1 cursor-pointer", onClick: () => scrollTo(sid) },
-                    React.createElement("div", { className: "truncate text-[13px] font-medium" }, s.title || s.label || TYPE_LABELS[s.type] || sid),
-                    React.createElement("div", { className: "text-[10px] text-white/40" }, TYPE_LABELS[s.type] || s.type)),
-                React.createElement("div", { className: "flex flex-col" },
-                    React.createElement("button", { onClick: () => move(i, i - 1), className: "px-1 text-[10px] text-white/40 hover:text-savills-yellow" }, "\u25B2"),
-                    React.createElement("button", { onClick: () => move(i, i + 1), className: "px-1 text-[10px] text-white/40 hover:text-savills-yellow" }, "\u25BC"))));
-        }))));
-}
-function ContentTab() {
-    const rows = [
-        ['Texto', 'Haz clic sobre cualquier título, párrafo o etiqueta y escribe. Pulsa fuera o Enter para confirmar.'],
-        ['Imágenes y fondos', 'Pasa el cursor sobre una imagen o fondo y pulsa el botón de cámara para subir un archivo.'],
-        ['Galería de Cartera', 'En Cartera puedes añadir, eliminar y arrastrar las tarjetas de casos para reordenarlas.'],
-        ['Orden de secciones', 'Usa la pestaña Capas para reordenar las secciones completas de la página.'],
-    ];
-    return (React.createElement("div", { className: "flex h-full flex-col overflow-y-auto px-4 py-3 scrollbar-dark" },
-        React.createElement("h3", { className: "text-xs font-bold uppercase tracking-wide text-white/70" }, "Edici\u00F3n de contenido"),
-        React.createElement("p", { className: "mt-1 text-[11px] text-white/40" }, "Todo se guarda autom\u00E1ticamente mientras editas."),
-        React.createElement("div", { className: "mt-4 space-y-2.5" }, rows.map((r, i) => (React.createElement("div", { key: i, className: "rounded-md bg-white/5 p-3" },
-            React.createElement("div", { className: "text-[12px] font-semibold text-white/90" }, r[0]),
-            React.createElement("div", { className: "mt-0.5 text-[11px] leading-snug text-white/50" }, r[1])))))));
-}
-function DesignTab() {
-    const { data, setBg } = useSite();
-    return (React.createElement("div", { className: "flex h-full flex-col overflow-y-auto px-4 py-3 scrollbar-dark" },
-        React.createElement("h3", { className: "text-xs font-bold uppercase tracking-wide text-white/70" }, "Dise\u00F1o \u00B7 Fondos"),
-        React.createElement("p", { className: "mt-1 text-[11px] text-white/40" }, "Cambia el color de fondo de cada secci\u00F3n."),
-        React.createElement("div", { className: "mt-4 space-y-3" }, data.sectionOrder.map(sid => {
-            const s = data.sections[sid];
-            if (!s || s.backgroundColor === undefined)
-                return null;
-            return (React.createElement("div", { key: sid, className: "rounded-md bg-white/5 p-3" },
-                React.createElement("div", { className: "mb-2 truncate text-[12px] font-medium text-white/80" }, s.title || s.label || sid),
-                React.createElement("div", { className: "flex flex-wrap items-center gap-2" },
-                    PRESET_COLORS.map(col => (React.createElement("button", { key: col, onClick: () => setBg(sid, col), title: col, className: 'h-7 w-7 rounded-full border-2 transition ' + (s.backgroundColor === col ? 'border-savills-yellow scale-110' : 'border-white/20 hover:border-white/50'), style: { backgroundColor: col } }))),
-                    React.createElement("input", { type: "color", value: s.backgroundColor, onChange: e => setBg(sid, e.target.value), className: "h-7 w-7 cursor-pointer rounded-full border-2 border-white/20 bg-transparent" }))));
-        }))));
-}
-function SidePanel({ open }) {
-    const [tab, setTab] = useState('layers');
-    if (!open)
-        return null;
-    const tabs = [['layers', 'Capas'], ['content', 'Contenido'], ['design', 'Diseño']];
-    return (React.createElement("aside", { className: "no-print fixed right-0 top-12 z-40 flex h-[calc(100vh-3rem)] w-[300px] flex-col border-l border-white/10 bg-[#18181b] text-white" },
-        React.createElement("div", { className: "flex border-b border-white/10" }, tabs.map(([k, lbl]) => (React.createElement("button", { key: k, onClick: () => setTab(k), className: 'flex-1 py-2.5 text-[11px] font-medium transition ' + (tab === k ? 'text-savills-yellow border-b-2 border-savills-yellow' : 'text-white/40 hover:text-white/70') }, lbl)))),
-        React.createElement("div", { className: "flex-1 overflow-hidden" },
-            tab === 'layers' && React.createElement(LayersTab, null),
-            tab === 'content' && React.createElement(ContentTab, null),
-            tab === 'design' && React.createElement(DesignTab, null))));
-}
-function DownloadPdfButton() {
-    return (React.createElement("button", { onClick: () => window.print(), className: "no-print fixed bottom-6 right-6 z-20 flex items-center gap-2 rounded-full bg-savills-navy px-4 py-3.5 text-xs font-semibold uppercase tracking-wide text-white shadow-lg transition hover:gap-3 hover:bg-black sm:bottom-8 sm:right-8" }, "\u2913 Descargar PDF"));
-}
-function ReturnToEditor() {
-    const { hasAccess, editorVisible, setEditorVisible } = useSite();
-    if (!hasAccess || editorVisible)
-        return null;
-    return (React.createElement("button", { onClick: () => setEditorVisible(true), title: "Volver al editor", className: "no-print fixed bottom-6 left-6 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-[#18181b] text-white shadow-lg transition hover:scale-110 sm:bottom-8 sm:left-8" }, "\u2699"));
-}
-/* ============================================================
-   9. APP
-   ============================================================ */
-function Shell() {
-    const { data, isEdit } = useSite();
-    const [active, setActive] = useState('cover');
-    const [panelOpen, setPanelOpen] = useState(true);
-    useEffect(() => {
-        const io = new IntersectionObserver((entries) => {
-            entries.forEach(e => { if (e.isIntersecting)
-                setActive(e.target.id); });
-        }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
-        data.sectionOrder.forEach(id => { const el = document.getElementById(id); if (el)
-            io.observe(el); });
-        return () => io.disconnect();
-    }, [data.sectionOrder]);
-    const nav = (id) => document.getElementById(id) && document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-    const navDark = active === 'cover' || active === 'contact';
-    return (React.createElement("div", { className: "relative min-h-screen w-full", style: { paddingTop: isEdit ? 48 : 0, marginRight: (isEdit && panelOpen) ? 300 : 0, transition: 'margin-right .3s ease' } },
-        isEdit && React.createElement(EditorTopBar, { panelOpen: panelOpen, setPanelOpen: setPanelOpen }),
-        React.createElement(Navbar, { active: active, onNav: nav, dark: navDark }),
-        React.createElement("main", null, data.sectionOrder.map(id => (React.createElement(SectionRenderer, { key: id, sectionId: id })))),
-        React.createElement(DownloadPdfButton, null),
-        React.createElement(ReturnToEditor, null),
-        isEdit && React.createElement(SidePanel, { open: panelOpen })));
-}
-function App() {
-    return React.createElement(SiteProvider, null,
-        React.createElement(Shell, null));
-}
-ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App, null));
-document.getElementById('boot-status').remove();
+  }
+  function buildTextList(){
+    const wrap=document.getElementById('tb-text-list'); wrap.innerHTML='';
+    document.querySelectorAll('[data-ek]').forEach(el=>{
+      const b=document.createElement('button');
+      b.className='w-full text-left text-xs text-[#bbb] hover:text-white hover:bg-[#222] rounded px-2 py-1.5 truncate';
+      b.textContent=el.textContent.trim()||'(vacío)';
+      b.addEventListener('click',()=>{ el.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>selectText(el),350); });
+      wrap.appendChild(b);
+    });
+  }
+  function buildImgGrid(){
+    const grid=document.getElementById('tb-img-grid'); grid.innerHTML='';
+    document.querySelectorAll('[data-imgk]').forEach(el=>{
+      const t=document.createElement('button');
+      t.className='aspect-square rounded-md overflow-hidden border border-[#2c2c2c] hover:border-yellow';
+      t.innerHTML='<img src="'+el.src+'" class="w-full h-full object-cover">';
+      t.addEventListener('click',()=>{ el.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>selectImg(el),350); });
+      grid.appendChild(t);
+    });
+  }
+  buildBgList(); buildTextList(); buildImgGrid();
+
+  const reopen=document.getElementById('tb-reopen');
+  document.getElementById('tb-close').addEventListener('click',()=>{ panel.classList.add('hidden-panel'); reopen.style.display='block'; });
+  reopen.addEventListener('click',()=>{ panel.classList.remove('hidden-panel'); reopen.style.display='none'; });
+
+  document.getElementById('tb-export').addEventListener('click',()=>{
+    const blob=new Blob([JSON.stringify(store,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='savills-cambios.json'; a.click();
+  });
+  document.getElementById('tb-reset').addEventListener('click',()=>{
+    if(!confirm('¿Restablecer TODOS los cambios? No se puede deshacer.')) return;
+    localStorage.removeItem(STORE_KEY); location.reload();
+  });
+})();
 </script>
+<script> if (window.lucide) lucide.createIcons(); </script>
 </body>
 </html>
