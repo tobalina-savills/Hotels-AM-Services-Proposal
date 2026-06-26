@@ -85,26 +85,48 @@
   body:not(.edit-mode) .cursor-hint { cursor: pointer; }
 
   /* --- acordeón de slides en el editor (tema claro estilo Figma) --- */
-  .tb-slide { background:#ffffff; border:1px solid #e5e5e8; border-radius:8px; overflow:hidden; }
-  .tb-slide-head { display:flex; align-items:center; gap:8px; padding:9px 10px; cursor:pointer; user-select:none; }
-  .tb-slide-head:hover { background:#f5f5f6; }
-  .tb-slide-handle { cursor:grab; color:#a8a8ad; touch-action:none; }
+  .tb-slide { background:#ffffff; border:1px solid #e5e5e8; border-radius:10px; overflow:hidden; box-shadow:0 1px 2px rgba(16,16,20,.03); }
+  .tb-slide-head { display:flex; align-items:center; gap:6px; padding:9px 9px; cursor:pointer; user-select:none; }
+  .tb-slide-head:hover { background:#f7f7f8; }
+  .tb-slide.open .tb-slide-head { background:#fafafa; border-bottom:1px solid #eeeeef; }
+  .tb-slide-handle { cursor:grab; color:#bcbcc1; touch-action:none; padding:2px; }
   .tb-slide-handle:active { cursor:grabbing; }
-  .tb-slide-num { font-size:10px; color:#9b9ba1; width:16px; text-align:center; shrink:0; }
-  .tb-slide-name { flex:1; font-size:12px; font-weight:500; color:#1c1c1f; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .tb-slide-chevron { color:#9b9ba1; transition:transform .2s; }
+  .tb-slide-arrows { display:flex; flex-direction:column; gap:1px; }
+  .tb-arrow { width:18px; height:14px; display:flex; align-items:center; justify-content:center; border-radius:4px; color:#9b9ba1; cursor:pointer; }
+  .tb-arrow:hover { background:#ececee; color:#1c1c1f; }
+  .tb-arrow[disabled] { opacity:.25; pointer-events:none; }
+  .tb-slide-num { font-size:10px; color:#b0b0b6; width:18px; text-align:center; flex-shrink:0; font-variant-numeric:tabular-nums; }
+  .tb-slide-name { flex:1; font-size:12.5px; font-weight:500; color:#1c1c1f; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tb-slide-count { font-size:10px; color:#b0b0b6; flex-shrink:0; }
+  .tb-slide-chevron { color:#b0b0b6; transition:transform .2s; flex-shrink:0; }
   .tb-slide.open .tb-slide-chevron { transform:rotate(90deg); }
-  .tb-slide-body { display:none; padding:4px 10px 12px 32px; border-top:1px solid #eeeeef; }
+  .tb-slide-body { display:none; padding:8px 10px 12px; }
   .tb-slide.open .tb-slide-body { display:block; }
   .tb-slide.dragging { opacity:.4; }
-  .tb-slide.drag-over { outline:1.5px dashed #B98A4B; outline-offset:2px; }
-  .tb-item-row { display:flex; align-items:center; gap:7px; padding:6px 6px; border-radius:6px; cursor:pointer; font-size:11.5px; color:#5c5c63; }
-  .tb-item-row:hover { background:#f5f5f6; color:#1c1c1f; }
-  .tb-item-row.active { background:#fbf3e9; color:#9a6a2f; }
-  .tb-item-row .ic { color:#9b9ba1; shrink:0; }
-  .tb-item-row span.lbl { flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tb-slide.drag-over { outline:2px solid #B98A4B; outline-offset:1px; }
+
+  .tb-group-label { font-size:9.5px; text-transform:uppercase; letter-spacing:.12em; color:#b0b0b6; margin:8px 4px 4px; font-weight:600; }
+  .tb-group-label:first-child { margin-top:2px; }
+  .tb-item-row { display:flex; align-items:center; gap:8px; padding:7px 8px; border-radius:7px; cursor:pointer; }
+  .tb-item-row:hover { background:#f5f5f6; }
+  .tb-item-row.active { background:#fbf3e9; box-shadow:inset 0 0 0 1px rgba(185,138,75,.35); }
+  .tb-item-row .ic { color:#9b9ba1; flex-shrink:0; }
+  .tb-item-row.active .ic { color:#B98A4B; }
+  .tb-item-txt { display:flex; flex-direction:column; min-width:0; flex:1; }
+  .tb-item-type { font-size:9px; text-transform:uppercase; letter-spacing:.08em; color:#b0b0b6; line-height:1.2; }
+  .tb-item-row.active .tb-item-type { color:#B98A4B; }
+  .tb-item-prev { font-size:11.5px; color:#3a3a40; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.3; }
+  .tb-empty-note { font-size:11px; color:#b0b0b6; padding:6px 4px; }
+
+  /* muestras de color rápidas */
+  .tb-swatches { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  .tb-color-chip { width:24px; height:24px; border-radius:6px; border:1px solid rgba(0,0,0,.12); cursor:pointer; }
+  .tb-color-chip:hover { transform:scale(1.08); }
+  .tb-color-chip.sel { box-shadow:0 0 0 2px #fff, 0 0 0 4px #B98A4B; }
+
   /* indicador en la web del slide seleccionado en el panel */
-  .tb-slide-highlight { outline:2px solid #B98A4B !important; outline-offset:-2px; }
+  .tb-slide-highlight { outline:2px solid #FFDF00 !important; outline-offset:-2px; }
+  .tb-field-label { font-size:10px; color:#9b9ba1; margin-bottom:3px; display:block; }
 </style>
 </head>
 
@@ -117,12 +139,12 @@
   <div class="h-16 px-6 md:px-10 flex items-center justify-between text-cream backdrop-blur-[2px]">
     <span class="text-[11px] tracking-[0.18em] font-medium" data-ek="nav.client">NOMBRE CLIENTE</span>
     <nav class="hidden lg:flex gap-7 text-[13px] font-medium nav-magnetic-group">
-      <a href="#porque" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l1">Savills en el mundo</a>
-      <a href="#equipo" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l2">Equipo</a>
-      <a href="#servicios" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l3">Servicios</a>
-      <a href="#cartera" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l4">Cartera</a>
-      <a href="#credenciales" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l5">Credenciales</a>
-      <a href="#contacta" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l6">Contacta</a>
+      <a href="#porque" data-cta="nav.l1.url" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l1">Savills en el mundo</a>
+      <a href="#equipo" data-cta="nav.l2.url" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l2">Equipo</a>
+      <a href="#servicios" data-cta="nav.l3.url" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l3">Servicios</a>
+      <a href="#cartera" data-cta="nav.l4.url" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l4">Cartera</a>
+      <a href="#credenciales" data-cta="nav.l5.url" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l5">Credenciales</a>
+      <a href="#contacta" data-cta="nav.l6.url" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l6">Contacta</a>
     </nav>
     <span class="text-[11px] tracking-[0.18em] font-bold" data-ek="nav.brand">SAVILLS</span>
   </div>
@@ -313,7 +335,7 @@
     <div class="relative max-w-[1200px] mx-auto px-6 md:px-10">
       <span class="text-[10px] uppercase tracking-[0.22em] text-cream/45" data-ek="cta.kicker">05 — Contacta</span>
       <h2 class="display text-[11vw] md:text-[72px] leading-[0.95] text-white mt-5 max-w-3xl" data-ek="cta.title">Hablemos de tu activo.</h2>
-      <a href="mailto:hoteles@savills.es" id="cta-mail-link" class="magnetic group inline-flex items-center gap-3 mt-9 text-2xl md:text-3xl display border-b-2 border-yellow pb-1 text-white cursor-hint">
+      <a href="mailto:hoteles@savills.es" id="cta-mail-link" data-cta="cta.mail.url" class="magnetic group inline-flex items-center gap-3 mt-9 text-2xl md:text-3xl display border-b-2 border-yellow pb-1 text-white cursor-hint">
         <span data-ek="cta.mail">hoteles@savills.es</span>
         <i data-lucide="arrow-up-right" class="w-7 h-7 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
       </a>
@@ -398,23 +420,26 @@
 
 
 <!-- ============ EDITOR OCULTO (panel) ============ -->
-<aside id="tb-panel" class="fixed top-0 right-0 h-screen w-[340px] z-[60] bg-white text-[#1c1c1f] border-l border-[#e5e5e8] shadow-2xl flex-col hidden-panel" style="display:none; font-family:Inter,sans-serif;">
+<aside id="tb-panel" class="fixed top-0 right-0 h-screen w-[348px] z-[60] bg-white text-[#1c1c1f] border-l border-[#e5e5e8] shadow-2xl flex-col hidden-panel" style="display:none; font-family:Inter,sans-serif;">
   <div class="flex items-center justify-between px-4 h-12 border-b border-[#e5e5e8] shrink-0">
     <div class="flex items-center gap-2">
-      <div class="w-5 h-5 rounded-[5px] bg-yellow flex items-center justify-center text-[10px] font-bold text-navy">F</div>
-      <span class="text-sm font-medium">PPT&nbsp;to&nbsp;Figma</span>
+      <div class="w-5 h-5 rounded-[5px] bg-yellow flex items-center justify-center text-[10px] font-bold text-navy">S</div>
+      <span class="text-sm font-medium">Editor Savills</span>
     </div>
-    <button id="tb-close" class="text-[#9b9ba1] hover:text-[#1c1c1f]"><i data-lucide="chevrons-right" class="w-4 h-4"></i></button>
+    <button id="tb-close" class="text-[#9b9ba1] hover:text-[#1c1c1f]" title="Ocultar panel"><i data-lucide="chevrons-right" class="w-4 h-4"></i></button>
   </div>
 
   <!-- inspector de la selección activa (siempre visible arriba) -->
   <div id="tb-inspector" class="px-4 py-3 border-b border-[#e5e5e8] shrink-0 bg-[#fafafa]">
-    <div class="text-[10px] uppercase tracking-[0.18em] text-[#9b9ba1] mb-2">Selección</div>
-    <div id="tb-sel-empty" class="text-xs text-[#9b9ba1] leading-relaxed">Haz clic en cualquier elemento de la web, o despliega una caja de abajo.</div>
+    <div class="flex items-center gap-1.5 mb-2">
+      <i id="tb-sel-icon" data-lucide="mouse-pointer-click" class="w-3.5 h-3.5 text-[#9b9ba1]"></i>
+      <span id="tb-sel-title" class="text-[10px] uppercase tracking-[0.16em] text-[#9b9ba1]">Nada seleccionado</span>
+    </div>
+    <div id="tb-sel-empty" class="text-xs text-[#9b9ba1] leading-relaxed">Toca cualquier texto, foto, botón o fondo de la página para editarlo aquí. O abre una sección abajo y elige el componente.</div>
 
     <div id="tb-sel-text" class="hidden">
-      <label class="text-[10px] text-[#9b9ba1]">Texto</label>
-      <textarea id="tb-text-input" rows="3" class="tb-input w-full rounded-md px-2 py-1.5 text-xs mt-1 resize-none"></textarea>
+      <label class="tb-field-label">Texto</label>
+      <textarea id="tb-text-input" rows="3" class="tb-input w-full rounded-md px-2 py-1.5 text-xs resize-none"></textarea>
     </div>
 
     <div id="tb-sel-media" class="hidden">
@@ -422,28 +447,47 @@
         <img id="tb-img-preview" class="w-full h-full object-cover hidden" alt="">
         <video id="tb-video-preview" class="w-full h-full object-cover hidden" muted loop autoplay playsinline></video>
       </div>
-      <button id="tb-media-replace" class="tb-input w-full rounded-md py-1.5 text-xs hover:border-[#B98A4B] flex items-center justify-center gap-1.5"><i data-lucide="upload" class="w-3.5 h-3.5"></i>Reemplazar imagen o vídeo</button>
+      <button id="tb-media-replace" class="tb-input w-full rounded-md py-2 text-xs font-medium hover:border-[#B98A4B] flex items-center justify-center gap-1.5"><i data-lucide="upload" class="w-3.5 h-3.5"></i>Subir imagen o vídeo</button>
       <input id="tb-media-file" type="file" accept="image/*,video/*" class="hidden">
+      <p class="text-[10px] text-[#b0b0b6] mt-1.5 leading-snug">Acepta JPG, PNG, MP4… Se ve al instante.</p>
     </div>
 
-    <div id="tb-sel-bg" class="hidden flex items-center justify-between gap-2">
-      <span class="text-xs text-[#5c5c63]">Color de fondo</span>
-      <input id="tb-bg-input" type="color" class="tb-swatch">
+    <div id="tb-sel-cta" class="hidden space-y-2">
+      <div>
+        <label class="tb-field-label">Texto del botón</label>
+        <input id="tb-cta-text" type="text" class="tb-input w-full rounded-md px-2 py-1.5 text-xs">
+      </div>
+      <div>
+        <label class="tb-field-label">Enlace (URL, email…)</label>
+        <input id="tb-cta-url" type="text" class="tb-input w-full rounded-md px-2 py-1.5 text-xs" placeholder="https://…  o  mailto:correo@…">
+      </div>
+    </div>
+
+    <div id="tb-sel-bg" class="hidden">
+      <label class="tb-field-label">Color de fondo de la sección</label>
+      <div class="flex items-center gap-2">
+        <input id="tb-bg-input" type="color" class="tb-swatch">
+        <span id="tb-bg-hex" class="text-[11px] text-[#5c5c63] font-mono">#000000</span>
+      </div>
+      <div class="tb-swatches" id="tb-bg-swatches"></div>
     </div>
   </div>
 
-  <!-- acordeón: una caja por slide -->
+  <!-- acordeón: una caja por sección -->
   <div class="flex-1 overflow-y-auto px-3 py-3 bg-[#f5f5f6]">
-    <div class="text-[10px] uppercase tracking-[0.18em] text-[#9b9ba1] mb-2 px-1">Slides — arrastra para reordenar</div>
+    <div class="flex items-center justify-between px-1 mb-2">
+      <span class="text-[10px] uppercase tracking-[0.16em] text-[#9b9ba1]">Secciones</span>
+      <span class="text-[10px] text-[#b0b0b6]">↑↓ o arrastra para ordenar</span>
+    </div>
     <div id="tb-slide-list" class="space-y-2"></div>
   </div>
 
   <div class="border-t border-[#e5e5e8] p-3 flex gap-2 shrink-0 bg-white">
-    <button id="tb-export" class="flex-1 bg-yellow text-navy rounded-md py-2 text-xs font-semibold flex items-center justify-center gap-1.5 hover:opacity-90"><i data-lucide="download" class="w-3.5 h-3.5"></i>Exportar</button>
-    <button id="tb-reset" class="px-3 bg-[#f0f0f1] text-[#5c5c63] rounded-md py-2 text-xs hover:bg-[#fde9e9] hover:text-red-600" title="Restablecer todo"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i></button>
+    <button id="tb-export" class="flex-1 bg-yellow text-navy rounded-md py-2 text-xs font-semibold flex items-center justify-center gap-1.5 hover:opacity-90" title="Descargar tus cambios"><i data-lucide="download" class="w-3.5 h-3.5"></i>Guardar copia</button>
+    <button id="tb-reset" class="px-3 bg-[#f0f0f1] text-[#5c5c63] rounded-md py-2 text-xs hover:bg-[#fde9e9] hover:text-red-600" title="Deshacer todos los cambios"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i></button>
   </div>
 </aside>
-<button id="tb-reopen" style="display:none" class="fixed top-1/2 right-0 -translate-y-1/2 z-[59] bg-white text-[#1c1c1f] px-2 py-3 rounded-l-lg border border-r-0 border-[#e5e5e8] shadow-md"><i data-lucide="panel-right-open" class="w-4 h-4"></i></button>
+<button id="tb-reopen" style="display:none" class="fixed top-1/2 right-0 -translate-y-1/2 z-[59] bg-white text-[#1c1c1f] px-2 py-3 rounded-l-lg border border-r-0 border-[#e5e5e8] shadow-md" title="Mostrar editor"><i data-lucide="panel-right-open" class="w-4 h-4"></i></button>
 
 
 <!-- ============ PARALLAX + SCROLL SUAVE + MICRO-INTERACCIONES ============ -->
@@ -540,7 +584,6 @@
 
 
 <!-- ============ EDITOR OCULTO · SOLO ?edit=Tobalina ============ -->
-
 <script>
 (function(){
   const params = new URLSearchParams(location.search);
@@ -548,21 +591,25 @@
   const STORE_KEY = 'savills_overrides_v1';
   const store = load();
 
-  applyAll();                 // overrides para TODOS (también visitantes)
-  applyOrder();                // orden de secciones para TODOS
-  if (!ON) return;             // sin palabra clave → editor invisible
+  applyAll();          // overrides de contenido (todos los visitantes)
+  applyOrder();        // orden de secciones (todos los visitantes)
+  if (!ON) return;     // sin palabra clave → editor invisible
 
-  function load(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {text:{},bg:{},img:{},order:null}; }catch(e){ return {text:{},bg:{},img:{},order:null}; } }
+  /* ===================== ALMACÉN ===================== */
+  function load(){
+    try{ const s = JSON.parse(localStorage.getItem(STORE_KEY)) || {}; return { text:s.text||{}, bg:s.bg||{}, img:s.img||{}, cta:s.cta||{}, order:s.order||null }; }
+    catch(e){ return { text:{}, bg:{}, img:{}, cta:{}, order:null }; }
+  }
   function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }
 
   function applyAll(){
     document.querySelectorAll('[data-ek]').forEach(el=>{ const k=el.dataset.ek; if(store.text[k]!=null) el.textContent=store.text[k]; });
     document.querySelectorAll('[data-bgk]').forEach(el=>{ const k=el.dataset.bgk; if(store.bg[k]) el.style.backgroundColor=store.bg[k]; });
+    document.querySelectorAll('[data-cta]').forEach(el=>{ const k=el.dataset.cta; if(store.cta[k]) el.setAttribute('href', store.cta[k]); });
     document.querySelectorAll('[data-imgk]').forEach(el=>{
       const k=el.dataset.imgk;
-      if(store.img[k]){
-        const m = store.img[k];
-        if (typeof m === 'object' && m.type==='video') swapToVideo(el, m.src);
+      if(store.img[k]){ const m=store.img[k];
+        if (typeof m==='object' && m.type==='video') swapToVideo(el, m.src);
         else el.src = (typeof m==='object'? m.src : m);
       }
     });
@@ -570,12 +617,10 @@
   function applyOrder(){
     if(!store.order || !Array.isArray(store.order)) return;
     const main = document.getElementById('site');
-    store.order.forEach(id=>{
-      const sec = document.getElementById(id);
-      if(sec) main.appendChild(sec);
-    });
+    store.order.forEach(id=>{ const sec=document.getElementById(id); if(sec) main.appendChild(sec); });
   }
 
+  /* ===================== ARRANQUE ===================== */
   document.body.classList.add('edit-mode');
   const panel = document.getElementById('tb-panel');
   panel.style.display='flex';
@@ -584,185 +629,241 @@
 
   let selected = null;
 
-  /* ---------- helpers de medios (imagen <-> vídeo) ---------- */
+  // paleta de marca para muestras rápidas de color de fondo
+  const BRAND = [
+    ['Navy', '#25273a'], ['Navy oscuro', '#1a1e2e'], ['Crema', '#eee8e3'],
+    ['Blanco', '#ffffff'], ['Amarillo', '#FFDF00'],
+  ];
+
+  /* ===================== MEDIOS (imagen <-> vídeo) ===================== */
   function isVideoFile(file){ return file.type.startsWith('video/'); }
   function swapToVideo(imgEl, src){
-    if (imgEl.tagName === 'VIDEO') { imgEl.src = src; return imgEl; }
-    const v = document.createElement('video');
-    v.src = src; v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
-    v.className = imgEl.className;
-    v.dataset.imgk = imgEl.dataset.imgk;
-    imgEl.replaceWith(v);
-    return v;
+    if (imgEl.tagName==='VIDEO'){ imgEl.src=src; return imgEl; }
+    const v=document.createElement('video');
+    v.src=src; v.muted=true; v.loop=true; v.autoplay=true; v.playsInline=true;
+    v.className=imgEl.className; v.dataset.imgk=imgEl.dataset.imgk;
+    imgEl.replaceWith(v); return v;
   }
   function swapToImage(videoEl, src){
-    const img = document.createElement('img');
-    img.src = src; img.alt = videoEl.alt || '';
-    img.className = videoEl.className;
-    img.dataset.imgk = videoEl.dataset.imgk;
-    videoEl.replaceWith(img);
-    return img;
+    const img=document.createElement('img');
+    img.src=src; img.alt=videoEl.alt||''; img.className=videoEl.className; img.dataset.imgk=videoEl.dataset.imgk;
+    videoEl.replaceWith(img); return img;
   }
 
-  /* ---------- selección directa en la web ---------- */
+  /* ===================== TIPADO AMABLE DE COMPONENTES ===================== */
+  function textType(el){
+    const t = el.tagName;
+    if (t==='H1') return 'Título principal';
+    if (t==='H2') return 'Título';
+    if (t==='H3') return 'Subtítulo';
+    if (t==='P')  return 'Párrafo';
+    return 'Texto';
+  }
+  function mediaType(el){ return el.tagName==='VIDEO' ? 'Vídeo' : 'Imagen'; }
+
+  /* ===================== SELECCIÓN EN LA WEB ===================== */
   function bindSelectable(root){
-    root.querySelectorAll('[data-ek]').forEach(el=>{
-      el.onclick = e => { e.preventDefault(); e.stopPropagation(); selectText(el); };
-    });
-    root.querySelectorAll('[data-imgk]').forEach(el=>{
-      el.onclick = e => { e.preventDefault(); e.stopPropagation(); selectMedia(el); };
-    });
-    root.querySelectorAll('[data-bgk]').forEach(el=>{
-      el.onclick = e => { if (e.target === el) selectBg(el); };
-    });
+    root.querySelectorAll('[data-cta]').forEach(el=>{ el.onclick = e=>{ e.preventDefault(); e.stopPropagation(); selectCta(el); }; });
+    root.querySelectorAll('[data-ek]').forEach(el=>{ if(el.hasAttribute('data-cta')) return; el.onclick = e=>{ e.preventDefault(); e.stopPropagation(); selectText(el); }; });
+    root.querySelectorAll('[data-imgk]').forEach(el=>{ el.onclick = e=>{ e.preventDefault(); e.stopPropagation(); selectMedia(el); }; });
+    root.querySelectorAll('[data-bgk]').forEach(el=>{ el.onclick = e=>{ if(e.target===el) selectBg(el); }; });
   }
   bindSelectable(document);
 
+  const $ = id => document.getElementById(id);
+  function showOnly(paneId, title, icon){
+    ['tb-sel-empty','tb-sel-text','tb-sel-media','tb-sel-cta','tb-sel-bg'].forEach(p=>$(p).classList.add('hidden'));
+    if (paneId) $(paneId).classList.remove('hidden'); else $('tb-sel-empty').classList.remove('hidden');
+    $('tb-sel-title').textContent = title || 'Nada seleccionado';
+    $('tb-sel-icon').setAttribute('data-lucide', icon || 'mouse-pointer-click');
+    if (window.lucide) lucide.createIcons();
+  }
   function clearSel(){
     document.querySelectorAll('.tb-selected').forEach(n=>n.classList.remove('tb-selected'));
     document.querySelectorAll('[contenteditable]').forEach(n=>n.removeAttribute('contenteditable'));
-    document.getElementById('tb-sel-empty').classList.remove('hidden');
-    document.getElementById('tb-sel-text').classList.add('hidden');
-    document.getElementById('tb-sel-media').classList.add('hidden');
-    document.getElementById('tb-sel-bg').classList.add('hidden');
     document.querySelectorAll('.tb-item-row.active').forEach(n=>n.classList.remove('active'));
-    selected = null;
+    selected=null;
+  }
+  function openSectionOf(el){
+    const sec = el.closest('section'); if(!sec) return;
+    const box = document.querySelector('.tb-slide[data-section-id="'+sec.id+'"]');
+    if (box && !box.classList.contains('open')){ box.classList.add('open'); if(window.lucide) lucide.createIcons(); }
+  }
+  function highlightRow(key){
+    const row=document.querySelector('.tb-item-row[data-key="'+key+'"]');
+    if(row){ openSectionOf(selected.el); row.classList.add('active'); row.scrollIntoView({block:'nearest'}); }
   }
 
   function selectText(el){
     clearSel(); el.classList.add('tb-selected');
     el.setAttribute('contenteditable','true'); el.focus();
-    selected = { type:'text', el, key:el.dataset.ek };
-    document.getElementById('tb-sel-empty').classList.add('hidden');
-    document.getElementById('tb-sel-text').classList.remove('hidden');
-    document.getElementById('tb-text-input').value = el.textContent.trim();
-    el.oninput = () => { store.text[el.dataset.ek] = el.textContent; document.getElementById('tb-text-input').value = el.textContent; save(); };
+    selected={ type:'text', el, key:el.dataset.ek };
+    showOnly('tb-sel-text', textType(el), 'type');
+    $('tb-text-input').value = el.textContent.trim();
+    el.oninput=()=>{ store.text[el.dataset.ek]=el.textContent; $('tb-text-input').value=el.textContent; save(); refreshRowPreview(el.dataset.ek, el.textContent); };
     highlightRow(el.dataset.ek);
   }
 
   function selectMedia(el){
     clearSel(); el.classList.add('tb-selected');
-    selected = { type:'media', el, key:el.dataset.imgk };
-    document.getElementById('tb-sel-empty').classList.add('hidden');
-    document.getElementById('tb-sel-media').classList.remove('hidden');
-    const imgPrev = document.getElementById('tb-img-preview');
-    const vidPrev = document.getElementById('tb-video-preview');
-    if (el.tagName === 'VIDEO') {
-      vidPrev.src = el.currentSrc || el.src; vidPrev.classList.remove('hidden'); imgPrev.classList.add('hidden');
-    } else {
-      imgPrev.src = el.src; imgPrev.classList.remove('hidden'); vidPrev.classList.add('hidden');
-    }
+    selected={ type:'media', el, key:el.dataset.imgk };
+    showOnly('tb-sel-media', mediaType(el), el.tagName==='VIDEO'?'video':'image');
+    const ip=$('tb-img-preview'), vp=$('tb-video-preview');
+    if (el.tagName==='VIDEO'){ vp.src=el.currentSrc||el.src; vp.classList.remove('hidden'); ip.classList.add('hidden'); }
+    else { ip.src=el.src; ip.classList.remove('hidden'); vp.classList.add('hidden'); }
     highlightRow(el.dataset.imgk);
+  }
+
+  function selectCta(a){
+    clearSel(); a.classList.add('tb-selected');
+    const textEl = a.matches('[data-ek]') ? a : a.querySelector('[data-ek]');
+    selected={ type:'cta', el:a, key:a.dataset.cta, textEl };
+    showOnly('tb-sel-cta', 'Botón / Enlace', 'link');
+    $('tb-cta-text').value = textEl ? textEl.textContent.trim() : '';
+    $('tb-cta-text').disabled = !textEl;
+    $('tb-cta-url').value = store.cta[a.dataset.cta] || a.getAttribute('href') || '';
+    highlightRow(a.dataset.cta);
   }
 
   function selectBg(el){
     clearSel(); el.classList.add('tb-selected');
-    selected = { type:'bg', el, key:el.dataset.bgk };
-    document.getElementById('tb-sel-empty').classList.add('hidden');
-    document.getElementById('tb-sel-bg').classList.remove('hidden');
-    document.getElementById('tb-bg-input').value = store.bg[el.dataset.bgk] || rgbToHex(getComputedStyle(el).backgroundColor);
+    selected={ type:'bg', el, key:el.dataset.bgk };
+    showOnly('tb-sel-bg', 'Fondo de sección', 'paint-bucket');
+    const cur = store.bg[el.dataset.bgk] || rgbToHex(getComputedStyle(el).backgroundColor);
+    $('tb-bg-input').value = cur; $('tb-bg-hex').textContent = cur;
+    buildSwatches(cur);
+    highlightRow(el.dataset.bgk);
   }
 
-  function highlightRow(key){
-    const row = document.querySelector('.tb-item-row[data-key="'+key+'"]');
-    if (row){ row.classList.add('active'); row.scrollIntoView({block:'nearest'}); }
+  function refreshRowPreview(key, val){
+    const row=document.querySelector('.tb-item-row[data-key="'+key+'"] .tb-item-prev');
+    if(row) row.textContent = (val||'').trim() || '(vacío)';
   }
 
-  /* ---------- inputs del inspector ---------- */
-  document.getElementById('tb-text-input').addEventListener('input', e => {
-    if (selected && selected.type==='text'){ selected.el.textContent = e.target.value; store.text[selected.key] = e.target.value; save(); }
+  /* ===================== INPUTS DEL INSPECTOR ===================== */
+  $('tb-text-input').addEventListener('input', e=>{
+    if(selected && selected.type==='text'){ selected.el.textContent=e.target.value; store.text[selected.key]=e.target.value; save(); refreshRowPreview(selected.key, e.target.value); }
   });
-  document.getElementById('tb-bg-input').addEventListener('input', e => {
-    if (selected && selected.type==='bg'){ selected.el.style.backgroundColor = e.target.value; store.bg[selected.key] = e.target.value; save(); buildSlideList(); }
+  $('tb-cta-text').addEventListener('input', e=>{
+    if(selected && selected.type==='cta' && selected.textEl){ selected.textEl.textContent=e.target.value; store.text[selected.textEl.dataset.ek]=e.target.value; save(); refreshRowPreview(selected.key, e.target.value); }
   });
-  document.getElementById('tb-media-replace').addEventListener('click', () => document.getElementById('tb-media-file').click());
-  document.getElementById('tb-media-file').addEventListener('change', e => {
-    const f = e.target.files[0]; if(!f || !selected || selected.type!=='media') return;
-    const r = new FileReader();
-    r.onload = ev => {
-      const dataUrl = ev.target.result;
-      let newEl = selected.el;
-      if (isVideoFile(f) && newEl.tagName !== 'VIDEO') newEl = swapToVideo(newEl, dataUrl);
-      else if (!isVideoFile(f) && newEl.tagName === 'VIDEO') newEl = swapToImage(newEl, dataUrl);
-      else newEl.src = dataUrl;
-      bindSelectable(newEl.parentElement || document);
-      store.img[selected.key] = { type: isVideoFile(f)?'video':'image', src: dataUrl };
-      save();
-      selectMedia(newEl);
-      buildSlideList();
+  $('tb-cta-url').addEventListener('input', e=>{
+    if(selected && selected.type==='cta'){ selected.el.setAttribute('href', e.target.value); store.cta[selected.key]=e.target.value; save(); }
+  });
+  $('tb-bg-input').addEventListener('input', e=>{
+    if(selected && selected.type==='bg'){ applyBg(e.target.value); buildSwatches(e.target.value); }
+  });
+  function applyBg(hex){
+    selected.el.style.backgroundColor=hex; store.bg[selected.key]=hex; save();
+    $('tb-bg-input').value=hex; $('tb-bg-hex').textContent=hex;
+  }
+  function buildSwatches(cur){
+    const wrap=$('tb-bg-swatches'); wrap.innerHTML='';
+    BRAND.forEach(([name,hex])=>{
+      const c=document.createElement('div');
+      c.className='tb-color-chip'+(hex.toLowerCase()===(cur||'').toLowerCase()?' sel':'');
+      c.style.background=hex; c.title=name;
+      c.addEventListener('click', ()=>{ if(selected&&selected.type==='bg') applyBg(hex); buildSwatches(hex); });
+      wrap.appendChild(c);
+    });
+  }
+
+  /* ---- subir imagen / vídeo ---- */
+  $('tb-media-replace').addEventListener('click', ()=>$('tb-media-file').click());
+  $('tb-media-file').addEventListener('change', e=>{
+    const f=e.target.files[0]; if(!f||!selected||selected.type!=='media') return;
+    const r=new FileReader();
+    r.onload=ev=>{
+      const dataUrl=ev.target.result; let el=selected.el;
+      if (isVideoFile(f) && el.tagName!=='VIDEO') el=swapToVideo(el, dataUrl);
+      else if (!isVideoFile(f) && el.tagName==='VIDEO') el=swapToImage(el, dataUrl);
+      else el.src=dataUrl;
+      bindSelectable(el.parentElement||document);
+      store.img[selected.key]={ type:isVideoFile(f)?'video':'image', src:dataUrl }; save();
+      selectMedia(el); buildSlideList();
     };
     r.readAsDataURL(f);
   });
 
   function rgbToHex(rgb){ const m=(rgb||'').match(/\d+/g); if(!m) return '#000000'; return '#'+m.slice(0,3).map(x=>(+x).toString(16).padStart(2,'0')).join(''); }
 
-  /* ===========================================================
-     ACORDEÓN DE SLIDES — una caja por <section>, con sus
-     componentes (textos, fondo, medios) y drag-and-drop
-     =========================================================== */
-  function describeEl(el){
-    if (el.hasAttribute('data-ek')) return { icon:'type', label: el.textContent.trim().slice(0,40) || '(vacío)', key: el.dataset.ek, fn:()=>selectText(el) };
-    if (el.hasAttribute('data-imgk')) return { icon: el.tagName==='VIDEO' ? 'video':'image', label: el.tagName==='VIDEO' ? 'Vídeo' : 'Imagen', key: el.dataset.imgk, fn:()=>selectMedia(el) };
+  /* ===================== ACORDEÓN DE SECCIONES ===================== */
+  const SECTION_NAMES = { cover:'Portada', porque:'Savills en el mundo', equipo:'Equipo', servicios:'Servicios', cartera:'Casos de éxito', credenciales:'Credenciales', contacta:'Contacta' };
+
+  function iconRow(icon, type, preview, key, onClick){
+    const r=document.createElement('div');
+    r.className='tb-item-row'; r.dataset.key=key;
+    r.innerHTML='<i data-lucide="'+icon+'" class="w-3.5 h-3.5 ic"></i>'+
+      '<span class="tb-item-txt"><span class="tb-item-type">'+type+'</span><span class="tb-item-prev">'+(preview||'')+'</span></span>';
+    r.addEventListener('click', onClick);
+    return r;
   }
 
   function buildSlideList(){
-    const wrap = document.getElementById('tb-slide-list');
-    const openIds = new Set([...wrap.querySelectorAll('.tb-slide.open')].map(n=>n.dataset.sectionId));
-    wrap.innerHTML = '';
-    const sections = [...document.querySelectorAll('#site > section')];
+    const wrap=$('tb-slide-list');
+    const openIds=new Set([...wrap.querySelectorAll('.tb-slide.open')].map(n=>n.dataset.sectionId));
+    wrap.innerHTML='';
+    const sections=[...document.querySelectorAll('#site > section')];
 
-    sections.forEach((sec, idx) => {
-      const id = sec.id || ('slide-'+idx);
-      const title = (sec.querySelector('[data-ek]')?.textContent.trim()) || id;
+    sections.forEach((sec, idx)=>{
+      const name = SECTION_NAMES[sec.id] || (sec.querySelector('[data-ek]')?.textContent.trim()) || sec.id;
       const bgEl = sec.matches('[data-bgk]') ? sec : sec.querySelector('[data-bgk]');
-      const textEls = [...sec.querySelectorAll('[data-ek]')];
+      const ctaEls = [...sec.querySelectorAll('[data-cta]')];
+      const ctaKeys = new Set(ctaEls.map(a=>a.dataset.cta));
+      const textEls = [...sec.querySelectorAll('[data-ek]')].filter(el=>!el.closest('[data-cta]'));
       const mediaEls = [...sec.querySelectorAll('[data-imgk]')];
+      const count = textEls.length + mediaEls.length + ctaEls.length + (bgEl?1:0);
 
-      const box = document.createElement('div');
-      box.className = 'tb-slide'; box.dataset.sectionId = sec.id; box.draggable = true;
+      const box=document.createElement('div');
+      box.className='tb-slide'; box.dataset.sectionId=sec.id; box.draggable=true;
 
-      const head = document.createElement('div');
-      head.className = 'tb-slide-head';
-      head.innerHTML =
-        '<i data-lucide="grip-vertical" class="w-3.5 h-3.5 tb-slide-handle"></i>'+
+      const head=document.createElement('div'); head.className='tb-slide-head';
+      head.innerHTML=
+        '<i data-lucide="grip-vertical" class="w-3.5 h-3.5 tb-slide-handle" title="Arrastra para mover"></i>'+
+        '<span class="tb-slide-arrows">'+
+          '<span class="tb-arrow up" title="Subir">▲</span>'+
+          '<span class="tb-arrow down" title="Bajar">▼</span>'+
+        '</span>'+
         '<span class="tb-slide-num">'+String(idx+1).padStart(2,'0')+'</span>'+
-        '<span class="tb-slide-name">'+title+'</span>'+
+        '<span class="tb-slide-name">'+name+'</span>'+
+        '<span class="tb-slide-count">'+count+'</span>'+
         '<i data-lucide="chevron-right" class="w-3.5 h-3.5 tb-slide-chevron"></i>';
-      head.addEventListener('click', (e) => {
-        if (e.target.closest('.tb-slide-handle')) return;
+
+      head.addEventListener('click', e=>{
+        if (e.target.closest('.tb-slide-handle') || e.target.closest('.tb-arrow')) return;
+        const willOpen = !box.classList.contains('open');
         box.classList.toggle('open');
+        if (willOpen) sec.scrollIntoView({behavior:'smooth', block:'start'});
         if (window.lucide) lucide.createIcons();
       });
+      head.querySelector('.tb-arrow.up').addEventListener('click', e=>{ e.stopPropagation(); moveSection(box, -1); });
+      head.querySelector('.tb-arrow.down').addEventListener('click', e=>{ e.stopPropagation(); moveSection(box, 1); });
 
-      const body = document.createElement('div');
-      body.className = 'tb-slide-body';
+      const body=document.createElement('div'); body.className='tb-slide-body';
 
-      if (bgEl) {
-        const r = document.createElement('div');
-        r.className = 'tb-item-row'; r.dataset.key = bgEl.dataset.bgk;
-        r.innerHTML = '<i data-lucide="paint-bucket" class="w-3.5 h-3.5 ic"></i><span class="lbl">Fondo de la sección</span>';
-        r.addEventListener('click', () => selectBg(bgEl));
-        body.appendChild(r);
+      if (bgEl){
+        const lab=document.createElement('div'); lab.className='tb-group-label'; lab.textContent='Fondo'; body.appendChild(lab);
+        body.appendChild(iconRow('paint-bucket','Color de fondo', store.bg[bgEl.dataset.bgk]||'', bgEl.dataset.bgk, ()=>selectBg(bgEl)));
       }
-      textEls.forEach(el => {
-        const d = describeEl(el);
-        const r = document.createElement('div');
-        r.className = 'tb-item-row'; r.dataset.key = d.key;
-        r.innerHTML = '<i data-lucide="'+d.icon+'" class="w-3.5 h-3.5 ic"></i><span class="lbl">'+d.label+'</span>';
-        r.addEventListener('click', d.fn);
-        body.appendChild(r);
-      });
-      mediaEls.forEach(el => {
-        const d = describeEl(el);
-        const r = document.createElement('div');
-        r.className = 'tb-item-row'; r.dataset.key = d.key;
-        r.innerHTML = '<i data-lucide="'+d.icon+'" class="w-3.5 h-3.5 ic"></i><span class="lbl">'+d.label+'</span>';
-        r.addEventListener('click', d.fn);
-        body.appendChild(r);
-      });
-      if (!bgEl && textEls.length===0 && mediaEls.length===0) {
-        body.innerHTML = '<div class="text-[11px] text-[#666] py-1">Sin componentes editables.</div>';
+      if (textEls.length){
+        const lab=document.createElement('div'); lab.className='tb-group-label'; lab.textContent='Textos'; body.appendChild(lab);
+        textEls.forEach(el=>{
+          const icon = (el.tagName==='H1'||el.tagName==='H2'||el.tagName==='H3') ? 'heading' : 'type';
+          body.appendChild(iconRow(icon, textType(el), el.textContent.trim().slice(0,42)||'(vacío)', el.dataset.ek, ()=>selectText(el)));
+        });
       }
+      if (mediaEls.length){
+        const lab=document.createElement('div'); lab.className='tb-group-label'; lab.textContent='Imágenes y vídeos'; body.appendChild(lab);
+        mediaEls.forEach(el=>{ body.appendChild(iconRow(el.tagName==='VIDEO'?'video':'image', mediaType(el), '', el.dataset.imgk, ()=>selectMedia(el))); });
+      }
+      if (ctaEls.length){
+        const lab=document.createElement('div'); lab.className='tb-group-label'; lab.textContent='Botones y enlaces'; body.appendChild(lab);
+        ctaEls.forEach(a=>{
+          const t = (a.matches('[data-ek]')?a:a.querySelector('[data-ek]'));
+          body.appendChild(iconRow('link', 'Botón / Enlace', (t?t.textContent.trim():a.getAttribute('href'))||'', a.dataset.cta, ()=>selectCta(a)));
+        });
+      }
+      if (!count){ const e=document.createElement('div'); e.className='tb-empty-note'; e.textContent='Sin componentes editables.'; body.appendChild(e); }
 
       box.appendChild(head); box.appendChild(body);
       if (openIds.has(sec.id)) box.classList.add('open');
@@ -770,70 +871,68 @@
     });
 
     if (window.lucide) lucide.createIcons();
+    updateArrows();
     bindDragAndDrop();
   }
 
-  /* ---------- drag & drop: reordenar slides (cajas del panel = secciones de la web) ---------- */
-  function bindDragAndDrop(){
-    const wrap = document.getElementById('tb-slide-list');
-    let dragEl = null;
-
-    wrap.querySelectorAll('.tb-slide').forEach(box => {
-      box.addEventListener('dragstart', e => {
-        dragEl = box; box.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-      });
-      box.addEventListener('dragend', () => {
-        box.classList.remove('dragging');
-        wrap.querySelectorAll('.drag-over').forEach(n=>n.classList.remove('drag-over'));
-      });
-      box.addEventListener('dragover', e => {
-        e.preventDefault();
-        if (box !== dragEl) box.classList.add('drag-over');
-      });
-      box.addEventListener('dragleave', () => box.classList.remove('drag-over'));
-      box.addEventListener('drop', e => {
-        e.preventDefault();
-        box.classList.remove('drag-over');
-        if (!dragEl || dragEl === box) return;
-        const boxes = [...wrap.children];
-        const dragIdx = boxes.indexOf(dragEl), dropIdx = boxes.indexOf(box);
-        if (dragIdx < dropIdx) box.after(dragEl); else box.before(dragEl);
-        reorderWebToMatchPanel();
-      });
+  /* ---- reorden con flechas ---- */
+  function moveSection(box, dir){
+    const wrap=$('tb-slide-list');
+    if (dir<0 && box.previousElementSibling) wrap.insertBefore(box, box.previousElementSibling);
+    else if (dir>0 && box.nextElementSibling) wrap.insertBefore(box.nextElementSibling, box);
+    else return;
+    commitOrder(); renumber(); updateArrows();
+    const sec=document.getElementById(box.dataset.sectionId);
+    if(sec) sec.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  function updateArrows(){
+    const boxes=[...$('tb-slide-list').children];
+    boxes.forEach((b,i)=>{
+      const up=b.querySelector('.tb-arrow.up'), dn=b.querySelector('.tb-arrow.down');
+      if(up) up.toggleAttribute('disabled', i===0);
+      if(dn) dn.toggleAttribute('disabled', i===boxes.length-1);
     });
   }
 
-  function reorderWebToMatchPanel(){
-    const wrap = document.getElementById('tb-slide-list');
-    const order = [...wrap.querySelectorAll('.tb-slide')].map(b => b.dataset.sectionId);
-    const main = document.getElementById('site');
-    order.forEach(id => { const sec = document.getElementById(id); if (sec) main.appendChild(sec); });
-    store.order = order; save();
-    renumber();
+  /* ---- reorden con arrastre ---- */
+  function bindDragAndDrop(){
+    const wrap=$('tb-slide-list'); let dragEl=null;
+    wrap.querySelectorAll('.tb-slide').forEach(box=>{
+      box.addEventListener('dragstart', e=>{ dragEl=box; box.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
+      box.addEventListener('dragend', ()=>{ box.classList.remove('dragging'); wrap.querySelectorAll('.drag-over').forEach(n=>n.classList.remove('drag-over')); });
+      box.addEventListener('dragover', e=>{ e.preventDefault(); if(box!==dragEl) box.classList.add('drag-over'); });
+      box.addEventListener('dragleave', ()=>box.classList.remove('drag-over'));
+      box.addEventListener('drop', e=>{
+        e.preventDefault(); box.classList.remove('drag-over');
+        if(!dragEl||dragEl===box) return;
+        const boxes=[...wrap.children]; const di=boxes.indexOf(dragEl), oi=boxes.indexOf(box);
+        if(di<oi) box.after(dragEl); else box.before(dragEl);
+        commitOrder(); renumber(); updateArrows();
+      });
+    });
+  }
+  function commitOrder(){
+    const order=[...$('tb-slide-list').querySelectorAll('.tb-slide')].map(b=>b.dataset.sectionId);
+    const main=$('site'); order.forEach(id=>{ const s=document.getElementById(id); if(s) main.appendChild(s); });
+    store.order=order; save();
   }
   function renumber(){
-    document.querySelectorAll('#tb-slide-list .tb-slide').forEach((box, i) => {
-      const numEl = box.querySelector('.tb-slide-num');
-      if (numEl) numEl.textContent = String(i+1).padStart(2,'0');
-    });
+    document.querySelectorAll('#tb-slide-list .tb-slide').forEach((b,i)=>{ const n=b.querySelector('.tb-slide-num'); if(n) n.textContent=String(i+1).padStart(2,'0'); });
   }
 
   buildSlideList();
 
-  /* ---------- cerrar / reabrir panel ---------- */
-  const reopen = document.getElementById('tb-reopen');
-  document.getElementById('tb-close').addEventListener('click', () => { panel.classList.add('hidden-panel'); reopen.style.display='block'; });
-  reopen.addEventListener('click', () => { panel.classList.remove('hidden-panel'); reopen.style.display='none'; });
+  /* ===================== PANEL: cerrar / exportar / reset ===================== */
+  const reopen=$('tb-reopen');
+  $('tb-close').addEventListener('click', ()=>{ panel.classList.add('hidden-panel'); reopen.style.display='block'; });
+  reopen.addEventListener('click', ()=>{ panel.classList.remove('hidden-panel'); reopen.style.display='none'; });
 
-  /* ---------- exportar / reset ---------- */
-  document.getElementById('tb-export').addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(store,null,2)], {type:'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = 'savills-cambios.json'; a.click();
+  $('tb-export').addEventListener('click', ()=>{
+    const blob=new Blob([JSON.stringify(store,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='savills-cambios.json'; a.click();
   });
-  document.getElementById('tb-reset').addEventListener('click', () => {
-    if(!confirm('¿Restablecer TODOS los cambios? Esta acción no se puede deshacer.')) return;
+  $('tb-reset').addEventListener('click', ()=>{
+    if(!confirm('¿Deshacer TODOS los cambios? No se puede revertir.')) return;
     localStorage.removeItem(STORE_KEY); location.reload();
   });
 })();
