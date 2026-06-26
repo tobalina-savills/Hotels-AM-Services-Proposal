@@ -70,16 +70,33 @@
   @media (prefers-reduced-motion: reduce){ *{scroll-behavior:auto !important;} }
 
   /* --- Casos de éxito: hover premium en cada tarjeta --- */
-  .case-card { cursor: default; }
-  .case-card .case-img { transition: transform .7s cubic-bezier(.22,1,.36,1); will-change: transform; }
-  .case-card:hover .case-img { transform: scale(1.06); }
+  .case-card { cursor: default; transition: transform .5s cubic-bezier(.22,1,.36,1); }
+  .case-card:hover { transform: translateY(-4px); }
+  .case-card .case-img { transition: transform .7s cubic-bezier(.22,1,.36,1), box-shadow .5s; will-change: transform; }
+  .case-card:hover .case-img { transform: scale(1.06); box-shadow: 0 18px 40px -12px rgba(0,0,0,.45); }
 
   /* --- Botón magnético --- */
   .magnetic { position:relative; will-change: transform; }
   .magnetic-inner { display:inline-flex; will-change: transform; }
 
-  /* --- Barra de progreso de scroll --- */
-  #scroll-progress { position:fixed; top:0; left:0; height:2px; background:#FFDF00; width:0%; z-index:50; transform-origin:left; }
+  /* --- Barra de progreso de scroll (con resplandor) --- */
+  #scroll-progress-track { position:fixed; top:0; left:0; width:100%; height:3px; z-index:51; background:rgba(255,255,255,.06); }
+  #scroll-progress { position:absolute; top:0; left:0; height:100%; width:0%; background:#FFDF00; transform-origin:left; box-shadow:0 0 12px 1px rgba(255,223,0,.55); }
+
+  /* --- Navbar adaptable: cambia según el color de lo que hay detrás --- */
+  #site-header { --nav-fg: #eee8e3; --nav-fg-dim: rgba(238,232,227,.75); --nav-accent:#FFDF00; }
+  #site-header.on-light { --nav-fg:#1a1e2e; --nav-fg-dim: rgba(26,30,46,.62); --nav-accent:#B98A4B; }
+  #nav-inner [data-ek], #nav-inner .nav-link { color: var(--nav-fg-dim); }
+  #nav-inner span[data-ek="nav.brand"], #nav-inner span[data-ek="nav.client"] { color: var(--nav-fg); }
+  #nav-inner .nav-link:hover { color: var(--nav-accent); }
+  #nav-backdrop { background: linear-gradient(to bottom, rgba(0,0,0,.16), transparent); }
+  #site-header.on-light #nav-backdrop { background: linear-gradient(to bottom, rgba(255,255,255,.5), transparent); }
+  #site-header.scrolled #nav-backdrop { opacity:1; }
+
+  /* --- Footer: subrayado animado en enlaces --- */
+  .footer-link { position:relative; }
+  .footer-link::after { content:''; position:absolute; left:0; bottom:-3px; width:0%; height:1px; background:#FFDF00; transition:width .35s cubic-bezier(.22,1,.36,1); }
+  .footer-link:hover::after { width:100%; }
 
   /* --- Cursor a medida sobre elementos interactivos (desktop, fuera del editor) --- */
   body:not(.edit-mode) .cursor-hint { cursor: pointer; }
@@ -104,6 +121,8 @@
   .tb-slide.open .tb-slide-body { display:block; }
   .tb-slide.dragging { opacity:.4; }
   .tb-slide.drag-over { outline:2px solid #B98A4B; outline-offset:1px; }
+  .tb-slide-fixed { background:#fafafa; border-style:dashed; }
+  .tb-slide-fixed .tb-slide-head { padding-left:12px; }
 
   .tb-group-label { font-size:9.5px; text-transform:uppercase; letter-spacing:.12em; color:#b0b0b6; margin:8px 4px 4px; font-weight:600; }
   .tb-group-label:first-child { margin-top:2px; }
@@ -124,6 +143,13 @@
   .tb-color-chip:hover { transform:scale(1.08); }
   .tb-color-chip.sel { box-shadow:0 0 0 2px #fff, 0 0 0 4px #B98A4B; }
 
+  /* pestañas de modo de relleno (Color / Degradado / Imagen / Vídeo) */
+  .tb-fillmode-tabs { display:flex; gap:4px; margin-top:6px; margin-bottom:10px; background:#f0f0f1; border-radius:8px; padding:3px; }
+  .tb-fillmode-tab { flex:1; display:flex; align-items:center; justify-content:center; gap:4px; font-size:10.5px; font-weight:500; color:#76767c; padding:6px 4px; border-radius:6px; cursor:pointer; border:none; background:transparent; }
+  .tb-fillmode-tab:hover { color:#1c1c1f; }
+  .tb-fillmode-tab.active { background:#ffffff; color:#1c1c1f; box-shadow:0 1px 2px rgba(16,16,20,.08); }
+  .tb-fill-pane.hidden { display:none; }
+
   /* indicador en la web del slide seleccionado en el panel */
   .tb-slide-highlight { outline:2px solid #FFDF00 !important; outline-offset:-2px; }
   .tb-field-label { font-size:10px; color:#9b9ba1; margin-bottom:3px; display:block; }
@@ -132,22 +158,23 @@
 
 <body class="bg-navy text-cream font-sans antialiased overflow-x-hidden">
 
-<div id="scroll-progress"></div>
+<div id="scroll-progress-track"><div id="scroll-progress"></div></div>
 
 <!-- ============ NAVBAR ============ -->
-<header class="fixed top-0 left-0 w-full z-40">
-  <div class="h-16 px-6 md:px-10 flex items-center justify-between text-cream backdrop-blur-[2px]">
+<header id="site-header" class="fixed top-0 left-0 w-full z-40">
+  <div id="nav-inner" class="h-16 px-6 md:px-10 flex items-center justify-between text-cream transition-colors duration-300">
     <span class="text-[11px] tracking-[0.18em] font-medium" data-ek="nav.client">NOMBRE CLIENTE</span>
     <nav class="hidden lg:flex gap-7 text-[13px] font-medium nav-magnetic-group">
-      <a href="#porque" data-cta="nav.l1.url" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l1">Savills en el mundo</a>
-      <a href="#equipo" data-cta="nav.l2.url" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l2">Equipo</a>
-      <a href="#servicios" data-cta="nav.l3.url" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l3">Servicios</a>
-      <a href="#cartera" data-cta="nav.l4.url" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l4">Cartera</a>
-      <a href="#credenciales" data-cta="nav.l5.url" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l5">Credenciales</a>
-      <a href="#contacta" data-cta="nav.l6.url" class="magnetic-sm hover:text-yellow transition-colors" data-ek="nav.l6">Contacta</a>
+      <a href="#porque" data-cta="nav.l1.url" class="magnetic-sm nav-link transition-colors" data-ek="nav.l1">Savills en el mundo</a>
+      <a href="#equipo" data-cta="nav.l2.url" class="magnetic-sm nav-link transition-colors" data-ek="nav.l2">Equipo</a>
+      <a href="#servicios" data-cta="nav.l3.url" class="magnetic-sm nav-link transition-colors" data-ek="nav.l3">Servicios</a>
+      <a href="#cartera" data-cta="nav.l4.url" class="magnetic-sm nav-link transition-colors" data-ek="nav.l4">Cartera</a>
+      <a href="#credenciales" data-cta="nav.l5.url" class="magnetic-sm nav-link transition-colors" data-ek="nav.l5">Credenciales</a>
+      <a href="#contacta" data-cta="nav.l6.url" class="magnetic-sm nav-link transition-colors" data-ek="nav.l6">Contacta</a>
     </nav>
     <span class="text-[11px] tracking-[0.18em] font-bold" data-ek="nav.brand">SAVILLS</span>
   </div>
+  <div id="nav-backdrop" class="absolute inset-0 -z-10 opacity-0 transition-opacity duration-300"></div>
 </header>
 
 <main id="site">
@@ -155,16 +182,19 @@
   <!-- ===== 01 · COVER ===== -->
   <section id="cover" data-bgk="cover" class="savills-texture relative min-h-screen flex items-center justify-center overflow-hidden">
     <div class="parallax absolute inset-0 savills-overlay" data-speed="-0.15"></div>
-    <div class="relative text-center px-6">
+    <!-- Capa de fondo editable: color sólido, degradado, imagen o vídeo -->
+    <div data-bgfill="cover" class="absolute inset-0 z-0"></div>
+    <div class="relative z-10 text-center px-6">
       <h1 class="parallax display text-white text-[20vw] md:text-[96px] leading-[0.9]" data-speed="0.08" data-ek="cover.title">Hoteles</h1>
       <p class="mt-3 text-[12px] md:text-[14px] tracking-[0.28em] uppercase text-white/90" data-ek="cover.sub">Asset Management. Propuesta de servicios</p>
     </div>
-    <div id="savills-seal" class="magnetic absolute bottom-8 left-1/2 -translate-x-1/2 savills-mark w-[88px] h-[88px] rounded-[2px] flex items-center justify-center text-2xl lowercase cursor-hint">savills</div>
+    <div id="savills-seal" class="magnetic absolute bottom-8 left-1/2 -translate-x-1/2 savills-mark w-[88px] h-[88px] rounded-[2px] flex items-center justify-center text-2xl lowercase cursor-hint z-10">savills</div>
   </section>
 
   <!-- ===== 02 · SAVILLS EN EL MUNDO (diseño real del Figma: "Presencia Global · Desktop") ===== -->
-  <section id="porque" data-bgk="porque" class="bg-[#1a1e2e] text-cream py-24 md:py-32 overflow-hidden">
-    <div class="max-w-[1294px] mx-auto px-6 md:px-16">
+  <section id="porque" data-bgk="porque" class="relative bg-[#1a1e2e] text-cream py-24 md:py-32 overflow-hidden">
+    <div data-bgfill="porque" class="absolute inset-0 z-0"></div>
+    <div class="relative z-10 max-w-[1294px] mx-auto px-6 md:px-16">
       <div class="flex flex-col lg:flex-row gap-12 lg:gap-12 lg:items-end">
 
         <!-- Columna izquierda: titular + cifras IBERIA -->
@@ -235,16 +265,17 @@
 
   <!-- ===== 03 · EQUIPO (diseño real del Figma) ===== -->
   <section id="equipo" data-bgk="equipo" class="savills-texture relative overflow-hidden pt-28 md:pt-36">
-    <div class="parallax absolute inset-0 savills-overlay" data-speed="-0.1"></div>
+    <div data-bgfill="equipo" class="absolute inset-0 z-0"></div>
+    <div class="parallax absolute inset-0 savills-overlay z-[1]" data-speed="-0.1"></div>
 
     <!-- header -->
-    <div class="relative text-center px-6 max-w-[680px] mx-auto">
+    <div class="relative z-10 text-center px-6 max-w-[680px] mx-auto">
       <h2 class="parallax display text-3xl md:text-[34px] text-cream" data-speed="0.05" data-ek="equipo.title">Tu equipo de Savills</h2>
       <p class="text-[13px] text-cream/85 mt-3 leading-relaxed" data-ek="equipo.intro">Cualquiera que sea tu objetivo inmobiliario, te ayudamos a tomar las mejores decisiones gracias a información constantemente actualizada y a nuestra experiencia a la vanguardia del sector.</p>
     </div>
 
     <!-- Iberia destacado -->
-    <div class="relative mt-12 flex flex-col items-center px-6">
+    <div class="relative z-10 mt-12 flex flex-col items-center px-6">
       <span class="savills-mark text-navy px-3 py-1 text-[11px] tracking-[0.18em] font-semibold" style="color:#25273a">IBERIA</span>
       <div id="iberia-lead" class="mt-7 flex flex-col items-center text-center"></div>
       <div class="w-px h-12 bg-yellow my-7"></div>
@@ -252,14 +283,16 @@
     </div>
 
     <!-- Directorio EMEA (barra blanca inferior) -->
-    <div data-bgk="equipo-bar" class="relative bg-white text-navytx mt-16 px-6 md:px-[60px] py-10">
-      <div id="emea-grid" class="max-w-[1440px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-10"></div>
+    <div data-bgk="equipo-bar" class="relative z-10 bg-white text-navytx mt-16 px-6 md:px-[60px] py-10 overflow-hidden">
+      <div data-bgfill="equipo-bar" class="absolute inset-0 z-0"></div>
+      <div id="emea-grid" class="relative z-10 max-w-[1440px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-10"></div>
     </div>
   </section>
 
   <!-- ===== 04 · SERVICIOS (a completar) ===== -->
-  <section id="servicios" data-bgk="servicios" class="bg-cream text-navytx py-28 md:py-40">
-    <div class="max-w-[1200px] mx-auto px-6 md:px-10">
+  <section id="servicios" data-bgk="servicios" class="relative bg-cream text-navytx py-28 md:py-40 overflow-hidden">
+    <div data-bgfill="servicios" class="absolute inset-0 z-0"></div>
+    <div class="relative z-10 max-w-[1200px] mx-auto px-6 md:px-10">
       <span class="text-[10px] uppercase tracking-[0.22em] text-navytx/45" data-ek="serv.kicker">02 — Servicios</span>
       <h2 class="display text-4xl md:text-6xl mt-4 mb-14" data-ek="serv.title">Qué hacemos</h2>
       <div class="grid md:grid-cols-2 gap-x-16 gap-y-8">
@@ -273,7 +306,8 @@
 
   <!-- ===== 05 · CASOS DE ÉXITO (diseño real del Figma: "Servicios · Desktop" / Frame 1) ===== -->
   <section id="cartera" data-bgk="cartera" class="savills-texture relative text-cream py-28 md:py-40 overflow-hidden">
-    <div class="relative max-w-[1280px] mx-auto px-6 md:px-10">
+    <div data-bgfill="cartera" class="absolute inset-0 z-0"></div>
+    <div class="relative z-10 max-w-[1280px] mx-auto px-6 md:px-10">
       <div class="flex flex-col lg:flex-row gap-12 lg:gap-10">
 
         <!-- Header fijo a la izquierda -->
@@ -316,8 +350,9 @@
   </section>
 
   <!-- ===== 06 · CREDENCIALES (a completar) ===== -->
-  <section id="credenciales" data-bgk="credenciales" class="bg-cream text-navytx py-28 md:py-40">
-    <div class="max-w-[1200px] mx-auto px-6 md:px-10">
+  <section id="credenciales" data-bgk="credenciales" class="relative bg-cream text-navytx py-28 md:py-40 overflow-hidden">
+    <div data-bgfill="credenciales" class="absolute inset-0 z-0"></div>
+    <div class="relative z-10 max-w-[1200px] mx-auto px-6 md:px-10">
       <span class="text-[10px] uppercase tracking-[0.22em] text-navytx/45" data-ek="cred.kicker">04 — Credenciales</span>
       <h2 class="display text-4xl md:text-6xl mt-4 mb-14" data-ek="cred.title">Resultados que avalan</h2>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-10">
@@ -331,22 +366,58 @@
 
   <!-- ===== 07 · CONTACTA ===== -->
   <section id="contacta" data-bgk="contacta" class="savills-texture relative text-cream py-28 md:py-44 overflow-hidden">
-    <div class="parallax absolute -bottom-24 -right-10 opacity-[0.06] display text-[30vw] text-white pointer-events-none select-none" data-speed="0.2">savills</div>
-    <div class="relative max-w-[1200px] mx-auto px-6 md:px-10">
+    <div data-bgfill="contacta" class="absolute inset-0 z-0"></div>
+    <div class="parallax absolute -bottom-24 -right-10 opacity-[0.06] display text-[30vw] text-white pointer-events-none select-none z-[1]" data-speed="0.2">savills</div>
+    <div class="relative z-10 max-w-[1200px] mx-auto px-6 md:px-10">
       <span class="text-[10px] uppercase tracking-[0.22em] text-cream/45" data-ek="cta.kicker">05 — Contacta</span>
       <h2 class="display text-[11vw] md:text-[72px] leading-[0.95] text-white mt-5 max-w-3xl" data-ek="cta.title">Hablemos de tu activo.</h2>
       <a href="mailto:hoteles@savills.es" id="cta-mail-link" data-cta="cta.mail.url" class="magnetic group inline-flex items-center gap-3 mt-9 text-2xl md:text-3xl display border-b-2 border-yellow pb-1 text-white cursor-hint">
         <span data-ek="cta.mail">hoteles@savills.es</span>
         <i data-lucide="arrow-up-right" class="w-7 h-7 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
       </a>
-      <footer class="mt-28 flex flex-col md:flex-row justify-between gap-3 text-xs text-cream/45 border-t border-white/10 pt-8">
-        <span data-ek="foot.l">Savills · Hoteles EMEA — Madrid</span>
-        <span data-ek="foot.r">Propuesta confidencial</span>
-      </footer>
     </div>
   </section>
 
 </main>
+
+<!-- ===== FOOTER ===== -->
+<footer id="site-footer" data-bgk="footer" class="relative bg-[#13141f] text-cream overflow-hidden">
+  <div data-bgfill="footer" class="absolute inset-0 z-0"></div>
+  <div class="relative z-10 max-w-[1200px] mx-auto px-6 md:px-10 pt-16 pb-8">
+
+    <div class="grid grid-cols-1 md:grid-cols-[1.3fr_1fr_1fr] gap-12 md:gap-8 pb-12 border-b border-white/10">
+      <!-- Marca -->
+      <div class="flex flex-col gap-4">
+        <span class="display text-2xl text-white" data-ek="foot.brand">Savills Hoteles</span>
+        <p class="text-[13px] text-cream/55 leading-relaxed max-w-[280px]" data-ek="foot.tagline">Asset Management para hoteles. Asesoramos cada decisión con datos y presencia local en toda Iberia y EMEA.</p>
+        <div class="savills-mark w-[52px] h-[52px] rounded-[2px] flex items-center justify-center text-base lowercase mt-1">savills</div>
+      </div>
+
+      <!-- Navegación -->
+      <div class="flex flex-col gap-3">
+        <span class="text-[10px] uppercase tracking-[0.18em] text-cream/40 mb-1" data-ek="foot.nav.label">Navegación</span>
+        <a href="#porque" data-cta="foot.nav.1.url" class="footer-link text-[13px] text-cream/75 hover:text-yellow transition-colors w-fit" data-ek="foot.nav.1">Savills en el mundo</a>
+        <a href="#equipo" data-cta="foot.nav.2.url" class="footer-link text-[13px] text-cream/75 hover:text-yellow transition-colors w-fit" data-ek="foot.nav.2">Equipo</a>
+        <a href="#servicios" data-cta="foot.nav.3.url" class="footer-link text-[13px] text-cream/75 hover:text-yellow transition-colors w-fit" data-ek="foot.nav.3">Servicios</a>
+        <a href="#cartera" data-cta="foot.nav.4.url" class="footer-link text-[13px] text-cream/75 hover:text-yellow transition-colors w-fit" data-ek="foot.nav.4">Casos de éxito</a>
+      </div>
+
+      <!-- Contacto -->
+      <div class="flex flex-col gap-3">
+        <span class="text-[10px] uppercase tracking-[0.18em] text-cream/40 mb-1" data-ek="foot.contact.label">Contacto</span>
+        <a href="mailto:hoteles@savills.es" data-cta="foot.contact.mail.url" class="footer-link text-[13px] text-cream/75 hover:text-yellow transition-colors w-fit" data-ek="foot.contact.mail">hoteles@savills.es</a>
+        <a href="tel:+34900000000" data-cta="foot.contact.tel.url" class="footer-link text-[13px] text-cream/75 hover:text-yellow transition-colors w-fit" data-ek="foot.contact.tel">+34 900 000 000</a>
+        <span class="text-[13px] text-cream/55" data-ek="foot.contact.addr">Madrid, España</span>
+      </div>
+    </div>
+
+    <div class="flex flex-col md:flex-row items-center justify-between gap-3 pt-7 text-[11px] text-cream/40">
+      <span data-ek="foot.l">© 2026 Savills · Hoteles EMEA — Madrid</span>
+      <span data-ek="foot.r">Propuesta confidencial</span>
+    </div>
+  </div>
+</footer>
+
 
 
 <!-- ============ DATOS DEL EQUIPO + RENDER (antes del editor) ============ -->
@@ -464,12 +535,55 @@
     </div>
 
     <div id="tb-sel-bg" class="hidden">
-      <label class="tb-field-label">Color de fondo de la sección</label>
-      <div class="flex items-center gap-2">
-        <input id="tb-bg-input" type="color" class="tb-swatch">
-        <span id="tb-bg-hex" class="text-[11px] text-[#5c5c63] font-mono">#000000</span>
+      <label class="tb-field-label">Relleno del fondo</label>
+      <div class="tb-fillmode-tabs">
+        <button type="button" class="tb-fillmode-tab" data-mode="color"><i data-lucide="palette" class="w-3 h-3"></i>Color</button>
+        <button type="button" class="tb-fillmode-tab" data-mode="gradient"><i data-lucide="paintbrush" class="w-3 h-3"></i>Degradado</button>
+        <button type="button" class="tb-fillmode-tab" data-mode="image"><i data-lucide="image" class="w-3 h-3"></i>Imagen</button>
+        <button type="button" class="tb-fillmode-tab" data-mode="video"><i data-lucide="video" class="w-3 h-3"></i>Vídeo</button>
       </div>
-      <div class="tb-swatches" id="tb-bg-swatches"></div>
+
+      <!-- Color sólido -->
+      <div id="tb-fill-color" class="tb-fill-pane hidden">
+        <div class="flex items-center gap-2">
+          <input id="tb-bg-input" type="color" class="tb-swatch">
+          <span id="tb-bg-hex" class="text-[11px] text-[#5c5c63] font-mono">#000000</span>
+        </div>
+        <div class="tb-swatches" id="tb-bg-swatches"></div>
+      </div>
+
+      <!-- Degradado -->
+      <div id="tb-fill-gradient" class="tb-fill-pane hidden">
+        <div class="flex items-center gap-2 mb-2">
+          <div><label class="tb-field-label">Desde</label><input id="tb-grad-from" type="color" class="tb-swatch"></div>
+          <div><label class="tb-field-label">Hasta</label><input id="tb-grad-to" type="color" class="tb-swatch"></div>
+          <div class="flex-1"><label class="tb-field-label">Dirección</label>
+            <select id="tb-grad-dir" class="tb-input w-full rounded-md px-2 py-1.5 text-xs">
+              <option value="to bottom">↓ Vertical</option>
+              <option value="to right">→ Horizontal</option>
+              <option value="to bottom right">↘ Diagonal</option>
+              <option value="to top">↑ Vertical inv.</option>
+            </select>
+          </div>
+        </div>
+        <div id="tb-grad-preview" class="w-full h-10 rounded-md border border-[#e5e5e8]"></div>
+      </div>
+
+      <!-- Imagen / Vídeo de fondo -->
+      <div id="tb-fill-image" class="tb-fill-pane hidden">
+        <div class="aspect-video w-full rounded-md overflow-hidden bg-[#eeeeef] mb-2 flex items-center justify-center border border-[#e5e5e8]" id="tb-fill-img-preview-wrap">
+          <img id="tb-fill-img-preview" class="w-full h-full object-cover hidden" alt="">
+        </div>
+        <button id="tb-fill-img-replace" type="button" class="tb-input w-full rounded-md py-2 text-xs font-medium hover:border-[#B98A4B] flex items-center justify-center gap-1.5"><i data-lucide="upload" class="w-3.5 h-3.5"></i>Subir imagen de fondo</button>
+      </div>
+      <div id="tb-fill-video" class="tb-fill-pane hidden">
+        <div class="aspect-video w-full rounded-md overflow-hidden bg-[#eeeeef] mb-2 flex items-center justify-center border border-[#e5e5e8]" id="tb-fill-video-preview-wrap">
+          <video id="tb-fill-video-preview" class="w-full h-full object-cover hidden" muted loop autoplay playsinline></video>
+        </div>
+        <button id="tb-fill-video-replace" type="button" class="tb-input w-full rounded-md py-2 text-xs font-medium hover:border-[#B98A4B] flex items-center justify-center gap-1.5"><i data-lucide="upload" class="w-3.5 h-3.5"></i>Subir vídeo de fondo</button>
+      </div>
+      <input id="tb-fill-file" type="file" class="hidden">
+      <p class="text-[10px] text-[#b0b0b6] mt-2 leading-snug">El color de fondo se ve si la imagen o vídeo es transparente o no se ha puesto ninguno.</p>
     </div>
   </div>
 
@@ -502,11 +616,12 @@
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const hasGsap  = typeof gsap !== 'undefined';
   const hasLenis = typeof Lenis !== 'undefined';
+  const EASE = 'cubic-bezier(.16,1,.3,1)'; // easing cinematográfico (estilo Awwwards)
 
   /* ---------- scroll suave (Lenis) ---------- */
   let lenis = null;
   if (!reduceMotion && hasLenis) {
-    lenis = new Lenis({ duration: 1.1, smoothWheel: true });
+    lenis = new Lenis({ duration: 1.15, smoothWheel: true });
     (function raf(t){ lenis.raf(t); requestAnimationFrame(raf); })();
   }
 
@@ -523,6 +638,51 @@
   if (lenis) lenis.on('scroll', updateProgress);
   updateProgress();
 
+  /* ---------- NAVBAR ADAPTABLE: lee el color real bajo la barra ---------- */
+  (function adaptiveNavbar(){
+    const header = document.getElementById('site-header');
+    if (!header) return;
+    const probeX = () => window.innerWidth / 2;
+    const probeY = 28; // punto vertical dentro del header, en píxeles
+
+    function luminance(rgb){
+      const m = rgb.match(/\d+/g); if(!m) return 0;
+      const [r,g,b] = m.map(Number);
+      // luminancia relativa perceptual (coeficientes ITU-R BT.601)
+      return (0.299*r + 0.587*g + 0.114*b) / 255;
+    }
+    function sampleBackground(){
+      header.style.pointerEvents = 'none';
+      const el = document.elementFromPoint(probeX(), probeY);
+      header.style.pointerEvents = '';
+      if (!el) return null;
+      let node = el;
+      while (node && node !== document.body) {
+        const bg = getComputedStyle(node).backgroundColor;
+        if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') return luminance(bg);
+        node = node.parentElement;
+      }
+      return null;
+    }
+    let lastState = null;
+    function update(){
+      const lum = sampleBackground();
+      const isLight = lum !== null && lum > 0.6;
+      const state = isLight ? 'light' : 'dark';
+      if (state !== lastState){
+        header.classList.toggle('on-light', isLight);
+        lastState = state;
+      }
+      header.classList.toggle('scrolled', (window.scrollY||document.documentElement.scrollTop) > 40);
+    }
+    update();
+    window.addEventListener('scroll', update, { passive:true });
+    if (lenis) lenis.on('scroll', update);
+    window.addEventListener('resize', update);
+    // re-evaluar tras animaciones/reveals que cambian el layout
+    setInterval(update, 600);
+  })();
+
   if (reduceMotion || !hasGsap) return; // a partir de aquí todo requiere GSAP
 
   gsap.registerPlugin(ScrollTrigger);
@@ -534,11 +694,44 @@
     gsap.to(el,{ yPercent:-s*100, ease:'none', scrollTrigger:{ trigger:el.closest('section')||el, scrub:true, start:'top bottom', end:'bottom top' }});
   });
 
-  /* ---------- reveal scroll-driven (texto general) ---------- */
-  gsap.utils.toArray('section').forEach(sec=>{
+  /* ---------- reveal scroll-driven premium (texto general) ---------- */
+  gsap.utils.toArray('section, footer#site-footer').forEach(sec=>{
     gsap.from(sec.querySelectorAll('h1,h2,h3,p,.display,#emea-grid > div'),{
-      opacity:0, y:36, filter:'blur(4px)', duration:.9, ease:'power3.out', stagger:.05,
-      scrollTrigger:{ trigger:sec, start:'top 78%' }
+      opacity:0, y:42, duration:1.1, ease:EASE, stagger:.06,
+      scrollTrigger:{ trigger:sec, start:'top 80%' }
+    });
+  });
+
+  /* ---------- títulos grandes: entrada con leve escala + recorte (clip-path) ---------- */
+  gsap.utils.toArray('h1.display, h2.display').forEach(h=>{
+    gsap.fromTo(h, { clipPath:'inset(0 0 100% 0)', y:18 }, {
+      clipPath:'inset(0 0 0% 0)', y:0, duration:1.1, ease:EASE,
+      scrollTrigger:{ trigger:h, start:'top 85%' }
+    });
+  });
+
+  /* ---------- cifras: cuentan hacia arriba al entrar en pantalla ---------- */
+  document.querySelectorAll('[data-ek$=".n"]').forEach(el=>{
+    const raw = el.textContent.trim();
+    const match = raw.match(/^([^\d]*)([\d.,]+)([^\d]*)$/);
+    if (!match) return;
+    const [, prefix, numStr, suffix] = match;
+    const cleanNum = parseFloat(numStr.replace(/\./g,'').replace(',', '.'));
+    if (isNaN(cleanNum)) return;
+    const hasThousandDot = /\d\.\d{3}/.test(numStr);
+    ScrollTrigger.create({
+      trigger: el, start:'top 85%', once:true,
+      onEnter: ()=>{
+        const obj = { v:0 };
+        gsap.to(obj, { v:cleanNum, duration:1.4, ease:'power2.out',
+          onUpdate: ()=>{
+            let n = Math.round(obj.v);
+            let formatted = hasThousandDot ? n.toLocaleString('es-ES') : String(n);
+            el.textContent = prefix + formatted + suffix;
+          },
+          onComplete: ()=>{ el.textContent = raw; }
+        });
+      }
     });
   });
 
@@ -546,8 +739,17 @@
   const casesGrid = document.querySelector('.cases-grid');
   if (casesGrid) {
     gsap.from(casesGrid.querySelectorAll('.case-card'), {
-      opacity:0, scale:.94, y:24, duration:.7, ease:'power3.out', stagger:.07,
-      scrollTrigger:{ trigger:casesGrid, start:'top 80%' }
+      opacity:0, scale:.94, y:28, duration:.85, ease:EASE, stagger:.08,
+      scrollTrigger:{ trigger:casesGrid, start:'top 82%' }
+    });
+  }
+
+  /* ---------- footer: entrada propia de la marca y columnas ---------- */
+  const footerEl = document.getElementById('site-footer');
+  if (footerEl){
+    gsap.from(footerEl.querySelectorAll('.savills-mark'), {
+      opacity:0, scale:.8, duration:.7, ease:EASE,
+      scrollTrigger:{ trigger:footerEl, start:'top 90%' }
     });
   }
 
@@ -597,14 +799,31 @@
 
   /* ===================== ALMACÉN ===================== */
   function load(){
-    try{ const s = JSON.parse(localStorage.getItem(STORE_KEY)) || {}; return { text:s.text||{}, bg:s.bg||{}, img:s.img||{}, cta:s.cta||{}, order:s.order||null }; }
-    catch(e){ return { text:{}, bg:{}, img:{}, cta:{}, order:null }; }
+    try{ const s = JSON.parse(localStorage.getItem(STORE_KEY)) || {}; return { text:s.text||{}, bg:s.bg||{}, fill:s.fill||{}, img:s.img||{}, cta:s.cta||{}, order:s.order||null }; }
+    catch(e){ return { text:{}, bg:{}, fill:{}, img:{}, cta:{}, order:null }; }
   }
   function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }
+
+  /* ---- aplicar capa de fondo (color / degradado / imagen / vídeo) ---- */
+  function renderFill(fillEl, data){
+    if (!data || !data.mode){ fillEl.innerHTML=''; fillEl.style.background=''; return; }
+    if (data.mode === 'color'){
+      fillEl.innerHTML=''; fillEl.style.background = data.color || '';
+    } else if (data.mode === 'gradient'){
+      fillEl.innerHTML=''; fillEl.style.background = `linear-gradient(${data.dir||'to bottom'}, ${data.from||'#000'}, ${data.to||'#000'})`;
+    } else if (data.mode === 'image'){
+      fillEl.style.background='';
+      fillEl.innerHTML = '<img src="'+data.src+'" class="w-full h-full object-cover" alt="">';
+    } else if (data.mode === 'video'){
+      fillEl.style.background='';
+      fillEl.innerHTML = '<video src="'+data.src+'" class="w-full h-full object-cover" muted loop autoplay playsinline></video>';
+    }
+  }
 
   function applyAll(){
     document.querySelectorAll('[data-ek]').forEach(el=>{ const k=el.dataset.ek; if(store.text[k]!=null) el.textContent=store.text[k]; });
     document.querySelectorAll('[data-bgk]').forEach(el=>{ const k=el.dataset.bgk; if(store.bg[k]) el.style.backgroundColor=store.bg[k]; });
+    document.querySelectorAll('[data-bgfill]').forEach(el=>{ const k=el.dataset.bgfill; if(store.fill[k]) renderFill(el, store.fill[k]); });
     document.querySelectorAll('[data-cta]').forEach(el=>{ const k=el.dataset.cta; if(store.cta[k]) el.setAttribute('href', store.cta[k]); });
     document.querySelectorAll('[data-imgk]').forEach(el=>{
       const k=el.dataset.imgk;
@@ -664,9 +883,14 @@
   /* ===================== SELECCIÓN EN LA WEB ===================== */
   function bindSelectable(root){
     root.querySelectorAll('[data-cta]').forEach(el=>{ el.onclick = e=>{ e.preventDefault(); e.stopPropagation(); selectCta(el); }; });
-    root.querySelectorAll('[data-ek]').forEach(el=>{ if(el.hasAttribute('data-cta')) return; el.onclick = e=>{ e.preventDefault(); e.stopPropagation(); selectText(el); }; });
+    root.querySelectorAll('[data-ek]').forEach(el=>{ if(el.closest('[data-cta]')) return; el.onclick = e=>{ e.preventDefault(); e.stopPropagation(); selectText(el); }; });
     root.querySelectorAll('[data-imgk]').forEach(el=>{ el.onclick = e=>{ e.preventDefault(); e.stopPropagation(); selectMedia(el); }; });
-    root.querySelectorAll('[data-bgk]').forEach(el=>{ el.onclick = e=>{ if(e.target===el) selectBg(el); }; });
+    root.querySelectorAll('[data-bgfill]').forEach(el=>{ el.onclick = e=>{ e.preventDefault(); e.stopPropagation(); selectBg(el); }; });
+    // data-bgk sin bgfill propio (compatibilidad): clic en zona vacía selecciona fondo
+    root.querySelectorAll('[data-bgk]').forEach(el=>{
+      if (el.querySelector('[data-bgfill="'+el.dataset.bgk+'"]')) return;
+      el.addEventListener('click', e=>{ if(e.target===el) selectBg(el); });
+    });
   }
   bindSelectable(document);
 
@@ -725,22 +949,84 @@
     highlightRow(a.dataset.cta);
   }
 
+  /* ---- fondo: 4 modos ---- */
   function selectBg(el){
     clearSel(); el.classList.add('tb-selected');
-    selected={ type:'bg', el, key:el.dataset.bgk };
-    showOnly('tb-sel-bg', 'Fondo de sección', 'paint-bucket');
-    const cur = store.bg[el.dataset.bgk] || rgbToHex(getComputedStyle(el).backgroundColor);
-    $('tb-bg-input').value = cur; $('tb-bg-hex').textContent = cur;
-    buildSwatches(cur);
-    highlightRow(el.dataset.bgk);
+    const key = el.dataset.bgfill || el.dataset.bgk;
+    selected={ type:'bg', el, key };
+    showOnly('tb-sel-bg', 'Fondo de sección', 'layers');
+    const cur = store.fill[key] || { mode:'color', color: store.bg[el.dataset.bgk] || rgbToHex(getComputedStyle(el).backgroundColor) };
+    setFillMode(cur.mode || 'color');
+    if (cur.mode === 'color'){ $('tb-bg-input').value = cur.color; $('tb-bg-hex').textContent = cur.color; buildSwatches(cur.color); }
+    if (cur.mode === 'gradient'){ $('tb-grad-from').value=cur.from||'#25273a'; $('tb-grad-to').value=cur.to||'#000000'; $('tb-grad-dir').value=cur.dir||'to bottom'; updateGradPreview(); }
+    if (cur.mode === 'image'){ const p=$('tb-fill-img-preview'); if(cur.src){ p.src=cur.src; p.classList.remove('hidden'); } else p.classList.add('hidden'); }
+    if (cur.mode === 'video'){ const p=$('tb-fill-video-preview'); if(cur.src){ p.src=cur.src; p.classList.remove('hidden'); } else p.classList.add('hidden'); }
+    highlightRow(key);
   }
+  function setFillMode(mode){
+    document.querySelectorAll('.tb-fillmode-tab').forEach(t=>t.classList.toggle('active', t.dataset.mode===mode));
+    document.querySelectorAll('.tb-fill-pane').forEach(p=>p.classList.add('hidden'));
+    $('tb-fill-'+mode).classList.remove('hidden');
+  }
+  document.querySelectorAll('.tb-fillmode-tab').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      if (!selected || selected.type!=='bg') return;
+      const mode = tab.dataset.mode;
+      setFillMode(mode);
+      if (mode==='color'){ const hex=$('tb-bg-input').value; commitFill({mode:'color', color:hex}); }
+      else if (mode==='gradient'){ updateGradPreview(); commitFill(currentGradData()); }
+      // image / video: se confirma al subir archivo
+    });
+  });
+  function commitFill(data){
+    store.fill[selected.key] = data;
+    renderFill(selected.el.querySelector('[data-bgfill="'+selected.key+'"]') || selected.el, data);
+    save();
+  }
+  function currentGradData(){
+    return { mode:'gradient', from:$('tb-grad-from').value, to:$('tb-grad-to').value, dir:$('tb-grad-dir').value };
+  }
+  function updateGradPreview(){
+    const d = currentGradData();
+    $('tb-grad-preview').style.background = `linear-gradient(${d.dir}, ${d.from}, ${d.to})`;
+  }
+  ['tb-grad-from','tb-grad-to','tb-grad-dir'].forEach(id=>{
+    $(id).addEventListener('input', ()=>{ updateGradPreview(); if(selected&&selected.type==='bg') commitFill(currentGradData()); });
+  });
+  $('tb-bg-input').addEventListener('input', e=>{
+    if(selected && selected.type==='bg'){ $('tb-bg-hex').textContent=e.target.value; commitFill({mode:'color', color:e.target.value}); buildSwatches(e.target.value); }
+  });
+  function buildSwatches(cur){
+    const wrap=$('tb-bg-swatches'); wrap.innerHTML='';
+    BRAND.forEach(([name,hex])=>{
+      const c=document.createElement('div');
+      c.className='tb-color-chip'+(hex.toLowerCase()===(cur||'').toLowerCase()?' sel':'');
+      c.style.background=hex; c.title=name;
+      c.addEventListener('click', ()=>{ if(selected&&selected.type==='bg'){ $('tb-bg-input').value=hex; $('tb-bg-hex').textContent=hex; commitFill({mode:'color', color:hex}); buildSwatches(hex); } });
+      wrap.appendChild(c);
+    });
+  }
+  $('tb-fill-img-replace').addEventListener('click', ()=>{ $('tb-fill-file').accept='image/*'; $('tb-fill-file').dataset.target='image'; $('tb-fill-file').click(); });
+  $('tb-fill-video-replace').addEventListener('click', ()=>{ $('tb-fill-file').accept='video/*'; $('tb-fill-file').dataset.target='video'; $('tb-fill-file').click(); });
+  $('tb-fill-file').addEventListener('change', e=>{
+    const f=e.target.files[0]; if(!f||!selected||selected.type!=='bg') return;
+    const target = e.target.dataset.target;
+    const r=new FileReader();
+    r.onload=ev=>{
+      const src=ev.target.result;
+      commitFill({ mode:target, src });
+      if (target==='image'){ const p=$('tb-fill-img-preview'); p.src=src; p.classList.remove('hidden'); }
+      else { const p=$('tb-fill-video-preview'); p.src=src; p.classList.remove('hidden'); }
+    };
+    r.readAsDataURL(f);
+  });
 
   function refreshRowPreview(key, val){
     const row=document.querySelector('.tb-item-row[data-key="'+key+'"] .tb-item-prev');
     if(row) row.textContent = (val||'').trim() || '(vacío)';
   }
 
-  /* ===================== INPUTS DEL INSPECTOR ===================== */
+  /* ===================== INPUTS DEL INSPECTOR (texto / cta / media) ===================== */
   $('tb-text-input').addEventListener('input', e=>{
     if(selected && selected.type==='text'){ selected.el.textContent=e.target.value; store.text[selected.key]=e.target.value; save(); refreshRowPreview(selected.key, e.target.value); }
   });
@@ -750,25 +1036,7 @@
   $('tb-cta-url').addEventListener('input', e=>{
     if(selected && selected.type==='cta'){ selected.el.setAttribute('href', e.target.value); store.cta[selected.key]=e.target.value; save(); }
   });
-  $('tb-bg-input').addEventListener('input', e=>{
-    if(selected && selected.type==='bg'){ applyBg(e.target.value); buildSwatches(e.target.value); }
-  });
-  function applyBg(hex){
-    selected.el.style.backgroundColor=hex; store.bg[selected.key]=hex; save();
-    $('tb-bg-input').value=hex; $('tb-bg-hex').textContent=hex;
-  }
-  function buildSwatches(cur){
-    const wrap=$('tb-bg-swatches'); wrap.innerHTML='';
-    BRAND.forEach(([name,hex])=>{
-      const c=document.createElement('div');
-      c.className='tb-color-chip'+(hex.toLowerCase()===(cur||'').toLowerCase()?' sel':'');
-      c.style.background=hex; c.title=name;
-      c.addEventListener('click', ()=>{ if(selected&&selected.type==='bg') applyBg(hex); buildSwatches(hex); });
-      wrap.appendChild(c);
-    });
-  }
 
-  /* ---- subir imagen / vídeo ---- */
   $('tb-media-replace').addEventListener('click', ()=>$('tb-media-file').click());
   $('tb-media-file').addEventListener('change', e=>{
     const f=e.target.files[0]; if(!f||!selected||selected.type!=='media') return;
@@ -787,7 +1055,11 @@
 
   function rgbToHex(rgb){ const m=(rgb||'').match(/\d+/g); if(!m) return '#000000'; return '#'+m.slice(0,3).map(x=>(+x).toString(16).padStart(2,'0')).join(''); }
 
-  /* ===================== ACORDEÓN DE SECCIONES ===================== */
+  /* ===========================================================
+     ACORDEÓN DE SECCIONES — auto-layout estilo Figma:
+     los componentes se listan en el ORDEN VISUAL REAL en que
+     aparecen dentro de la sección (mezclados, no agrupados por tipo)
+     =========================================================== */
   const SECTION_NAMES = { cover:'Portada', porque:'Savills en el mundo', equipo:'Equipo', servicios:'Servicios', cartera:'Casos de éxito', credenciales:'Credenciales', contacta:'Contacta' };
 
   function iconRow(icon, type, preview, key, onClick){
@@ -799,6 +1071,34 @@
     return r;
   }
 
+  // recorre el DOM de la sección en orden y devuelve una fila por cada
+  // componente editable encontrado, en el orden visual real (auto-layout)
+  function walkComponentsInOrder(root, out){
+    for (const node of root.children){
+      if (node.matches('[data-bgfill]')){
+        out.push(iconRow('layers', 'Fondo', 'Color / degradado / imagen / vídeo', node.dataset.bgfill, ()=>selectBg(node)));
+        continue; // capa de fondo no tiene hijos editables relevantes
+      }
+      if (node.matches('[data-cta]')){
+        const t = node.matches('[data-ek]') ? node : node.querySelector('[data-ek]');
+        out.push(iconRow('link', 'Botón / Enlace', (t?t.textContent.trim():node.getAttribute('href'))||'', node.dataset.cta, ()=>selectCta(node)));
+        continue; // no descender dentro de un CTA
+      }
+      if (node.matches('[data-ek]')){
+        const icon = (node.tagName==='H1'||node.tagName==='H2'||node.tagName==='H3') ? 'heading' : 'type';
+        out.push(iconRow(icon, textType(node), node.textContent.trim().slice(0,42)||'(vacío)', node.dataset.ek, ()=>selectText(node)));
+        continue;
+      }
+      if (node.matches('[data-imgk]')){
+        out.push(iconRow(node.tagName==='VIDEO'?'video':'image', mediaType(node), '', node.dataset.imgk, ()=>selectMedia(node)));
+        continue;
+      }
+      // contenedor genérico: descender
+      walkComponentsInOrder(node, out);
+    }
+    return out;
+  }
+
   function buildSlideList(){
     const wrap=$('tb-slide-list');
     const openIds=new Set([...wrap.querySelectorAll('.tb-slide.open')].map(n=>n.dataset.sectionId));
@@ -807,12 +1107,7 @@
 
     sections.forEach((sec, idx)=>{
       const name = SECTION_NAMES[sec.id] || (sec.querySelector('[data-ek]')?.textContent.trim()) || sec.id;
-      const bgEl = sec.matches('[data-bgk]') ? sec : sec.querySelector('[data-bgk]');
-      const ctaEls = [...sec.querySelectorAll('[data-cta]')];
-      const ctaKeys = new Set(ctaEls.map(a=>a.dataset.cta));
-      const textEls = [...sec.querySelectorAll('[data-ek]')].filter(el=>!el.closest('[data-cta]'));
-      const mediaEls = [...sec.querySelectorAll('[data-imgk]')];
-      const count = textEls.length + mediaEls.length + ctaEls.length + (bgEl?1:0);
+      const rows = walkComponentsInOrder(sec, []);
 
       const box=document.createElement('div');
       box.className='tb-slide'; box.dataset.sectionId=sec.id; box.draggable=true;
@@ -826,7 +1121,7 @@
         '</span>'+
         '<span class="tb-slide-num">'+String(idx+1).padStart(2,'0')+'</span>'+
         '<span class="tb-slide-name">'+name+'</span>'+
-        '<span class="tb-slide-count">'+count+'</span>'+
+        '<span class="tb-slide-count">'+rows.length+'</span>'+
         '<i data-lucide="chevron-right" class="w-3.5 h-3.5 tb-slide-chevron"></i>';
 
       head.addEventListener('click', e=>{
@@ -840,35 +1135,42 @@
       head.querySelector('.tb-arrow.down').addEventListener('click', e=>{ e.stopPropagation(); moveSection(box, 1); });
 
       const body=document.createElement('div'); body.className='tb-slide-body';
-
-      if (bgEl){
-        const lab=document.createElement('div'); lab.className='tb-group-label'; lab.textContent='Fondo'; body.appendChild(lab);
-        body.appendChild(iconRow('paint-bucket','Color de fondo', store.bg[bgEl.dataset.bgk]||'', bgEl.dataset.bgk, ()=>selectBg(bgEl)));
-      }
-      if (textEls.length){
-        const lab=document.createElement('div'); lab.className='tb-group-label'; lab.textContent='Textos'; body.appendChild(lab);
-        textEls.forEach(el=>{
-          const icon = (el.tagName==='H1'||el.tagName==='H2'||el.tagName==='H3') ? 'heading' : 'type';
-          body.appendChild(iconRow(icon, textType(el), el.textContent.trim().slice(0,42)||'(vacío)', el.dataset.ek, ()=>selectText(el)));
-        });
-      }
-      if (mediaEls.length){
-        const lab=document.createElement('div'); lab.className='tb-group-label'; lab.textContent='Imágenes y vídeos'; body.appendChild(lab);
-        mediaEls.forEach(el=>{ body.appendChild(iconRow(el.tagName==='VIDEO'?'video':'image', mediaType(el), '', el.dataset.imgk, ()=>selectMedia(el))); });
-      }
-      if (ctaEls.length){
-        const lab=document.createElement('div'); lab.className='tb-group-label'; lab.textContent='Botones y enlaces'; body.appendChild(lab);
-        ctaEls.forEach(a=>{
-          const t = (a.matches('[data-ek]')?a:a.querySelector('[data-ek]'));
-          body.appendChild(iconRow('link', 'Botón / Enlace', (t?t.textContent.trim():a.getAttribute('href'))||'', a.dataset.cta, ()=>selectCta(a)));
-        });
-      }
-      if (!count){ const e=document.createElement('div'); e.className='tb-empty-note'; e.textContent='Sin componentes editables.'; body.appendChild(e); }
+      if (rows.length){ rows.forEach(r=>body.appendChild(r)); }
+      else { const e=document.createElement('div'); e.className='tb-empty-note'; e.textContent='Sin componentes editables.'; body.appendChild(e); }
 
       box.appendChild(head); box.appendChild(body);
       if (openIds.has(sec.id)) box.classList.add('open');
       wrap.appendChild(box);
     });
+
+    /* ---- caja fija del footer: editable, pero no reordenable junto a las secciones ---- */
+    const footerEl = document.getElementById('site-footer');
+    if (footerEl){
+      const rows = walkComponentsInOrder(footerEl, []);
+      const box = document.createElement('div');
+      box.className='tb-slide tb-slide-fixed'; box.dataset.sectionId='site-footer';
+
+      const head = document.createElement('div'); head.className='tb-slide-head';
+      head.innerHTML =
+        '<i data-lucide="layout-panel-top" class="w-3.5 h-3.5" style="color:#bcbcc1; transform:rotate(180deg);"></i>'+
+        '<span class="tb-slide-name">Pie de página</span>'+
+        '<span class="tb-slide-count">'+rows.length+'</span>'+
+        '<i data-lucide="chevron-right" class="w-3.5 h-3.5 tb-slide-chevron"></i>';
+      head.addEventListener('click', ()=>{
+        const willOpen = !box.classList.contains('open');
+        box.classList.toggle('open');
+        if (willOpen) footerEl.scrollIntoView({behavior:'smooth', block:'start'});
+        if (window.lucide) lucide.createIcons();
+      });
+
+      const body = document.createElement('div'); body.className='tb-slide-body';
+      if (rows.length){ rows.forEach(r=>body.appendChild(r)); }
+      else { const e=document.createElement('div'); e.className='tb-empty-note'; e.textContent='Sin componentes editables.'; body.appendChild(e); }
+
+      box.appendChild(head); box.appendChild(body);
+      if (openIds.has('site-footer')) box.classList.add('open');
+      wrap.appendChild(box);
+    }
 
     if (window.lucide) lucide.createIcons();
     updateArrows();
@@ -886,7 +1188,7 @@
     if(sec) sec.scrollIntoView({behavior:'smooth', block:'start'});
   }
   function updateArrows(){
-    const boxes=[...$('tb-slide-list').children];
+    const boxes=[...$('tb-slide-list').children].filter(b=>!b.classList.contains('tb-slide-fixed'));
     boxes.forEach((b,i)=>{
       const up=b.querySelector('.tb-arrow.up'), dn=b.querySelector('.tb-arrow.down');
       if(up) up.toggleAttribute('disabled', i===0);
@@ -897,7 +1199,7 @@
   /* ---- reorden con arrastre ---- */
   function bindDragAndDrop(){
     const wrap=$('tb-slide-list'); let dragEl=null;
-    wrap.querySelectorAll('.tb-slide').forEach(box=>{
+    wrap.querySelectorAll('.tb-slide:not(.tb-slide-fixed)').forEach(box=>{
       box.addEventListener('dragstart', e=>{ dragEl=box; box.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
       box.addEventListener('dragend', ()=>{ box.classList.remove('dragging'); wrap.querySelectorAll('.drag-over').forEach(n=>n.classList.remove('drag-over')); });
       box.addEventListener('dragover', e=>{ e.preventDefault(); if(box!==dragEl) box.classList.add('drag-over'); });
@@ -912,12 +1214,12 @@
     });
   }
   function commitOrder(){
-    const order=[...$('tb-slide-list').querySelectorAll('.tb-slide')].map(b=>b.dataset.sectionId);
+    const order=[...$('tb-slide-list').querySelectorAll('.tb-slide:not(.tb-slide-fixed)')].map(b=>b.dataset.sectionId);
     const main=$('site'); order.forEach(id=>{ const s=document.getElementById(id); if(s) main.appendChild(s); });
     store.order=order; save();
   }
   function renumber(){
-    document.querySelectorAll('#tb-slide-list .tb-slide').forEach((b,i)=>{ const n=b.querySelector('.tb-slide-num'); if(n) n.textContent=String(i+1).padStart(2,'0'); });
+    document.querySelectorAll('#tb-slide-list .tb-slide:not(.tb-slide-fixed)').forEach((b,i)=>{ const n=b.querySelector('.tb-slide-num'); if(n) n.textContent=String(i+1).padStart(2,'0'); });
   }
 
   buildSlideList();
